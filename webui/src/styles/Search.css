@@ -1,0 +1,28 @@
+.search-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .search-bar {
+    position: relative;
+    border-radius: 20px;
+    background-color: #eff7f6;
+    margin: 0;
+    width: 80%;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-input {
+    padding: 10px 20px;
+    width: 100%;
+    color: #5f6368;
+  }
+  
+  .search-icon-button {
+    padding: 10px;
+    color: #5f6368;
+  }
+  

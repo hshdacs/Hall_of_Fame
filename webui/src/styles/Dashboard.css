@@ -1,0 +1,32 @@
+.app-container {
+    font-family: 'Arial', sans-serif;
+    color: #333333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #474e5d;
+  }
+  
+  .page-content {
+    flex-grow: 1;
+    /* padding: 24px; */
+    
+  }
+  
+  .header-text {
+    margin-left: 25px;
+    color: rgba(0, 0, 0, 0.699999988079071);
+  }
+
+  .appContainer {
+    box-shadow: 10px 10px 6px 6px #979797;
+    margin-bottom: 18px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 95%;
+    margin-left: 36px;
+    border-radius: 15px;
+  }

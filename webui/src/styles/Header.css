@@ -1,0 +1,21 @@
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #DF4807;
+    height: 15px;
+    box-shadow: 0px 5px 10px #979797;
+  }
+.header2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #021E30;
+    height: 25px;
+    box-shadow: 0px 5px 10px #979797;
+}
+  
+
+  
