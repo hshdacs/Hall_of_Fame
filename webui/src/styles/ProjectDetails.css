@@ -5,10 +5,18 @@
   flex-direction: column;
 }
 
+.box {
+    background-color: #021E30;
+    position: absolute;
+    margin-top: 120px;
+    height: 40%;
+    width: 100%;
+}
 .project_title  {
     margin-top: 15px;
-    margin-left: 35px;
-    font-weight: bold
+    margin-left: 15px;
+    font-weight: bold;
+    font-size: 30px;
 }
 .carousel {
     position: relative; /* Changed to relative to avoid absolute positioning issues */
@@ -19,7 +27,7 @@
     height: 400px;
     margin: auto; /* Added margin to center the carousel horizontally */
     overflow: hidden;
-    margin-top:24px
+    margin-top:10px
 }
 
 .slide {
@@ -111,3 +119,87 @@
     margin-right: 10px;
     margin-left: 1269px;
 } 
+
+.left-arrow {
+    color: #DF4807;
+    margin-top: 15px;
+    margin-left:35px;
+    
+}
+
+.previous_screen {
+    font-weight: bold;
+    color: #DF4807;
+    margin-left:10px;
+    font-size: 22px;
+    letter-spacing: 0.5em;
+}
+
+.icon-box {
+    display: inline-block;
+    padding: 8px; /* Adjust padding as needed */
+    border: 2px solid #DF4807; /* Adjust border size and color as needed */
+    border-radius: 15px 5px 5px 5px; /* Individual border radius values for each corner */
+    background-color: #DF4807; /* Optional: add background color */
+    margin-top: 18px;
+    margin-left: 32px;
+}
+
+.container {
+    margin-top: 20px;
+    display: flex;
+    align-items: center; /* Align items vertically centered */
+}
+
+.description {
+    word-spacing: 0.5em; /* Adjust the value for word spacing */
+    letter-spacing: 0.1em; /* Adjust the value for letter spacing */
+    margin-right: 20px; /* Add some space between the text and the button */
+    color: #DF4807;
+    font-weight: bold;
+    font-size:20px;
+    margin-left:35px
+}
+
+.run_btn {
+    background-color: #DF4807; /* Background color */
+    color: #fff; /* Text color */
+    border: none; /* Remove default border */
+    padding: 10px 20px; /* Padding inside the button */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+    margin-left:780px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.run_btn:hover {
+    background-color: #c43f06; /* Darker background on hover */
+}
+
+.run_btn:focus {
+    outline: none; /* Remove focus outline */
+    box-shadow: 0 0 0 3px rgba(223, 72, 7, 0.5); /* Add a focus shadow */
+}
+
+.desc_container {
+    margin-left:35px;
+    max-width: 1360px;
+    text-align: justify;
+}
+
+.tech_container {
+    background-color: #D9D9D9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    width: 90%;
+    margin-left:65px
+}
+
+.tech_title {
+    font-size: 30px;
+    font-weight: bold;
+}

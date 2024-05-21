@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Grid, Typography } from '@mui/material';
+import { Container, Typography } from '@mui/material';
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from 'react-responsive-carousel';
 import Header from '../components/Header';
 import '../styles/ProjectDetails.css';
 import { BsArrowLeftCircleFill, BsArrowRightCircleFill } from "react-icons/bs";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faBook } from '@fortawesome/free-solid-svg-icons';
+import appLogo from '../assets/card-image 1.png';
+import ProjectDescription from '../components/ProjectDescription';
 
 const ProjectDetails = ({ projectData }) => {
     const [slide, setSlide] = useState(0);
-    console.log("slide--------->",slide);
-    // Get the project ID from the URL params
     const { projectId } = useParams();
 
-    // Find the project details based on the project ID
     const project = projectData.find((project) => project.id === projectId);
 
-    // If project is not found, display a message
     if (!project) {
         return (
             <Container>
@@ -25,63 +25,63 @@ const ProjectDetails = ({ projectData }) => {
         );
     }
 
-   const nextSlide = () => {
-    console.log("next slide")
+    const nextSlide = () => {
         setSlide((prevSlide) => (prevSlide + 1) % project.images.length);
     };
 
     const prevSlide = () => {
-        console.log("prev slide")
         setSlide((prevSlide) => (prevSlide - 1 + project.images.length) % project.images.length);
     };
+
+    const setCurrentSlide = (index) => {
+        setSlide(index);
+    };
+
     return (
         <div>
             <Header />
-            <div className='appContainer1'>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', marginLeft: '35px', marginTop: '10px' }}>{project.projectTitle}</Typography>
-                {/* Display multiple project images */}
-           
-                <div className='carousel'>
-                    <BsArrowLeftCircleFill onClick={prevSlide} className="arrow arrow-left" />
-                    {project.images.map((imageSrc, idx) => (
-                        <img
-                            src={imageSrc}
-                            alt={`Project Image ${idx + 1}`}
-                            key={idx}
-                            className={slide === idx ? "slide" : "slide slide-hidden"}
-                        />
-                    ))}
-                    <BsArrowRightCircleFill
-                        onClick={nextSlide}
-                        className="arrow arrow-right"
-                    />
-                    <span className="indicators">
-                        {project.images.map((_, idx) => (
-                            <button
-                                key={idx}
-                                className={slide === idx ? "indicator" : "indicator indicator-inactive"}
-                                onClick={() => setSlide(idx)}
-                            ></button>
+            <FontAwesomeIcon className='left-arrow' icon={faArrowLeft} size="2xl" />
+            <span className='previous_screen'>DASHBOARD</span>
+            <div className='box'></div>
+                <div>
+                    <div className="icon-box">
+                        <FontAwesomeIcon className='icon-box"' icon={faBook} size="2xl" style={{ color: 'white' }} />
+
+                    </div>
+                    <span className='project_title'>{project.projectTitle}</span>
+                </div>
+                <div className="carousel">
+                    <BsArrowLeftCircleFill className="arrow arrow-left" onClick={prevSlide} />
+                    <Carousel selectedItem={slide} showArrows={false} showIndicators={false} showStatus={false} showThumbs={false}>
+                        {project.images.map((image, index) => (
+                            <div key={index} className={`slide ${slide === index ? '' : 'slide-hidden'}`}>
+                                <img src={image} alt={`Project image ${index + 1}`} className="carousel-image" />
+                            </div>
                         ))}
-                    </span>
-                   
+                    </Carousel>
+                    <BsArrowRightCircleFill className="arrow arrow-right" onClick={nextSlide} />
+                    <div className="indicators">
+                        {project.images.map((_, index) => (
+                            <button
+                                key={index}
+                                className={`indicator ${slide === index ? 'indicator-active' : 'indicator-inactive'}`}
+                                onClick={() => setCurrentSlide(index)}
+                            />
+                        ))}
+                    </div>
                 </div>
-                <div className='button-container'>
-                    <button className='button'>Run Project</button>
-                </div>
-                 <Typography variant="body1" sx={{ marginLeft: '35px', fontWeight:'bold',marginTop:'15px'}} gutterBottom>{project.longDescription}</Typography>
-                 <Typography variant="subtitle1" sx={{ marginLeft: '35px', fontWeight:'bold',marginTop:'15px'}} >Team: {project.teamName}</Typography>
-      <Typography variant="subtitle1" sx={{ marginLeft: '35px', fontWeight:'bold',marginTop:'15px'}} >Status: {project.status}</Typography>
-      <Typography variant="subtitle1" sx={{ marginLeft: '35px', fontWeight:'bold',marginTop:'15px'}} >Labels: {project.labels.join(',')}</Typography>
-      <Typography variant="subtitle1" sx={{ marginLeft: '35px', fontWeight:'bold',marginTop:'15px'}} >Technologies Used: {project.technologiesUsed.join(', ')}</Typography>
-      <Typography variant="subtitle1" sx={{ marginLeft: '35px', fontWeight:'bold',marginTop:'15px'}} >GitHub URL: <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">{project.githubUrl}</a></Typography>
-      <Typography variant="subtitle1" sx={{ marginLeft: '35px', fontWeight:'bold',marginTop:'15px'}} >Docker Image URL: <a href={project.dockerImageUrl} target="_blank" rel="noopener noreferrer">{project.dockerImageUrl}</a></Typography>
+            <div className="container">
+                <p className="description">YOU    WILL    LEARN     ABOUT    PROJECT</p>
+                <span><button className="run_btn">Run Project</button></span>
             </div>
+            <div className="desc_container">
+            <ProjectDescription description={project.longDescription} />
+        </div>
+        <div className="tech_container">
+           <p className='tech_title'>Technology Used</p>
+        </div>
         </div>
     );
 };
 
 export default ProjectDetails;
-
-
-//project.images.map

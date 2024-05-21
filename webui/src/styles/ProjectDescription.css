@@ -1,0 +1,19 @@
+.description_text {
+    white-space: pre-wrap; /* Preserves whitespace and line breaks */
+    word-spacing: 0.1em;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    display: inline; /* Ensures the paragraph stays inline */
+    font-weight: 600;
+}
+
+.toggle-text {
+    color: #DF4807; /* Highlight color */
+    cursor: pointer;
+    text-decoration: underline; /* Optional: makes it look more like a link */
+    margin-left: 5px; /* Slight spacing to separate from the ellipsis */
+}
+
+.toggle-text:hover {
+    color: #c43f06; /* Darker color on hover */
+}
