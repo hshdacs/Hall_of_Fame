@@ -11,6 +11,7 @@ const SearchBar = ({ searchTerm, onSearchChange, onSearchExecute }) => {
         className="search-bar"
         elevation={3}
         onSubmit={onSearchExecute}
+        sx={{ border: '20px', backgroundColor: '#eff7f6'}}
       >
         <InputBase
           className="search-input"

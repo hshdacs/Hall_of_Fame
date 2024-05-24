@@ -1,10 +1,11 @@
 .job-card {
-    max-width: 300px;
+    max-width: 400px;
     height: 100%; 
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     transition: box-shadow 0.3s;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   }
 
    .job-card:hover {
@@ -14,7 +15,13 @@
     box-shadow: 0 6px 11px 0 rgba(0, 0, 0, 0.996);
    }
    
-
+   .card-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 10px;
+    width:100
+   }
    
   .card-action-area {
     height: 100%;
@@ -49,7 +56,7 @@
   
 .project-card:hover {
     transform: scale(1.05);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    
   } 
 
   .project-card {

@@ -1,5 +1,6 @@
 import React from 'react';
 import '../styles/Header.css';
+import srhIcon from '../assets/srh.png';
 
 const Header = () => {
 
@@ -8,6 +9,7 @@ const Header = () => {
             <div className="header-container">
             </div>
             <div className="header2">
+            <img src={srhIcon} alt="App Logo" className="app-logo"/>
             </div>
         </div>
     );

@@ -1,13 +1,11 @@
 import React from 'react';
 import { Grid, CardActionArea, Box } from '@mui/material';
 import '../styles/Cards.css';
-import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -33,22 +31,18 @@ const ProjectCards = ({ projects, page, onPageChange }) => {
 
     return (
         <>
-            <Grid container spacing={3}>
+            <Grid container spacing={2} >
                 {currentProjects.map((project, index) => (
                     <Grid item xs={12} sm={6} md={4} key={index}>
-                        <CardActionArea onClick={() => handleCardClick(project.id)}>
-                            <Card className="project-card" sx={{ maxWidth: 345 }}>
+                        <CardActionArea sx={{position:'none'}} onClick={() => handleCardClick(project.id)}>
+                            <Card className="job-card" sx={{ maxWidth: 400 }}>
                                 <CardHeader
                                     avatar={
                                         <Avatar sx={{ bgcolor: red[500] }} aria-label="project">
                                             {project.projectTitle.charAt(0)}
                                         </Avatar>
                                     }
-                                    action={
-                                        <IconButton aria-label="settings">
-                                            <MoreVertIcon />
-                                        </IconButton>
-                                    }
+                                  
                                     title={project.projectTitle}
                                     subheader={new Date(project.createdDate).toLocaleDateString()}
                                 />

@@ -6,6 +6,7 @@ import { Container } from '@mui/material';
 import SearchBar from '../components/Search';
 import appLogo from '../assets/card-image 1.png';
 import '../styles/Dashboard.css';
+import Filter from '../components/Filter'; // Import the Filter component
 
 // Hardcoded project data
 const projectData = [
@@ -113,15 +114,18 @@ const Dashboard = () => {
         <div>
             <Header />
             <div>
-                <h1 className='header-text'>Explore All ACS Projects Here!</h1>
-                <div className='appContainer'>
-                    <Container>
+                <h1 className='header-text'>Explore All Projects Here!</h1>
+              
+                    <Container className='appContainer'>
+                        <div className='filter'>
                         <SearchBar
-                            className='search-bar'
+                            className='search-button'
                             searchTerm={searchTerm}
                             onSearchChange={handleSearchChange}
                             onSearchExecute={handleSearchExecute}
                         />
+                         <Filter />
+                    </div>
                         <ProjectCards
                             projects={filteredProjects}
                             page={currentPage}
@@ -129,7 +133,6 @@ const Dashboard = () => {
                             onCardClick={handleCardClick}
                         />
                     </Container>
-                </div>
             </div>
         </div>
     );
