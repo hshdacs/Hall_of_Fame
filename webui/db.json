@@ -1,41 +1,40 @@
 {
-    "projects": [
-      {
-        "id": "PROJECT-1234",
-        "projectTitle": "Next Generation AI Development",
-        "createdDate": "2024-05-16T10:30:00Z",
-        "longDescription": "This project aims to develop the next generation of AI models that are more efficient and accurate. The project includes various stages such as data collection, model training, and deployment.",
-        "images": [
-          "https://example.com/image1.png",
-          "https://example.com/image2.png",
-          "https://example.com/image3.png"
-        ],
-        "teamName": "AI Development Team",
-        "status": "in progress",
-        "labels": ["AI", "development", "machine learning"],
-        "priority": "high",
-        "technologiesUsed": ["Python", "TensorFlow", "Keras"],
-        "githubUrl": "https://github.com/example/next-gen-ai",
-        "dockerImageUrl": "https://hub.docker.com/r/example/next-gen-ai"
-      },
-      {
-        "id": "PROJECT-5678",
-        "projectTitle": "Web Application Redesign",
-        "createdDate": "2024-04-10T08:00:00Z",
-        "longDescription": "The goal of this project is to redesign the company's web application to improve user experience and performance. The redesign will focus on updating the UI/UX, enhancing the backend, and adding new features.",
-        "images": [
-          "https://example.com/image4.png",
-          "https://example.com/image5.png",
-          "https://example.com/image6.png"
-        ],
-        "teamName": "Web Dev Team",
-        "status": "in progress",
-        "labels": ["web", "UI/UX", "frontend", "backend"],
-        "priority": "medium",
-        "technologiesUsed": ["React", "Node.js", "Express"],
-        "githubUrl": "https://github.com/example/web-app-redesign",
-        "dockerImageUrl": "https://hub.docker.com/r/example/web-app-redesign"
-      }
-    ]
-  }
-  
+  "projects": [
+    {
+      "id": "PROJECT-1234",
+      "projectTitle": "Next Generation AI Development",
+      "createdDate": "2024-05-16T10:30:00Z",
+      "longDescription": "This project aims to develop the next generation of AI models that are more efficient and accurate. The project includes various stages such as data collection, model training, and deployment.",
+      "images": [
+        "https://example.com/image1.png",
+        "https://example.com/image2.png",
+        "https://example.com/image3.png"
+      ],
+      "technologiesUsed": ["Python", "TensorFlow", "Keras"],
+      "githubUrl": "https://github.com/example/next-gen-ai",
+      "dockerImageUrl": "https://hub.docker.com/r/example/next-gen-ai",
+      "school": "School of Computing",
+      "studyProgramme": "MSc in Artificial Intelligence",
+      "yearOfBatch": 2024,
+      "faculty": "Faculty of Engineering"
+    },
+    {
+      "id": "PROJECT-5678",
+      "projectTitle": "Web Application Redesign",
+      "createdDate": "2024-04-10T08:00:00Z",
+      "longDescription": "The goal of this project is to redesign the company's web application to improve user experience and performance. The redesign will focus on updating the UI/UX, enhancing the backend, and adding new features.",
+      "images": [
+        "https://example.com/image4.png",
+        "https://example.com/image5.png",
+        "https://example.com/image6.png"
+      ],
+      "technologiesUsed": ["React", "Node.js", "Express"],
+      "githubUrl": "https://github.com/example/web-app-redesign",
+      "dockerImageUrl": "https://hub.docker.com/r/example/web-app-redesign",
+      "school": "School of Information Technology",
+      "studyProgramme": "BSc in Computer Science",
+      "yearOfBatch": 2023,
+      "faculty": "Faculty of Engineering"
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+2024-07-04T06:37:03.431Z [example-service] error: uncaughtException: Cannot find module '../services/carRental.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+Error: Cannot find module '../services/carRental.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:212:19)
+    at Module.require (node:internal/modules/cjs/loader:1297:12)
+    at require (node:internal/modules/helpers:123:16)
+    at Object.<anonymous> (/Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js:4:30)
+    at Module._compile (node:internal/modules/cjs/loader:1460:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1544:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+2024-07-04T06:37:40.319Z [example-service] error: uncaughtException: Cannot find module '../services/carRental.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+Error: Cannot find module '../services/carRental.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:212:19)
+    at Module.require (node:internal/modules/cjs/loader:1297:12)
+    at require (node:internal/modules/helpers:123:16)
+    at Object.<anonymous> (/Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js:4:30)
+    at Module._compile (node:internal/modules/cjs/loader:1460:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1544:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+2024-07-04T06:37:52.217Z [example-service] error: uncaughtException: Cannot find module '../services/carRental.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+Error: Cannot find module '../services/carRental.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:212:19)
+    at Module.require (node:internal/modules/cjs/loader:1297:12)
+    at require (node:internal/modules/helpers:123:16)
+    at Object.<anonymous> (/Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js:4:30)
+    at Module._compile (node:internal/modules/cjs/loader:1460:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1544:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+2024-07-04T06:38:14.152Z [example-service] error: uncaughtException: Cannot find module '../services/booking.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+Error: Cannot find module '../services/booking.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:212:19)
+    at Module.require (node:internal/modules/cjs/loader:1297:12)
+    at require (node:internal/modules/helpers:123:16)
+    at Object.<anonymous> (/Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js:6:27)
+    at Module._compile (node:internal/modules/cjs/loader:1460:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1544:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+2024-07-04T06:38:27.050Z [example-service] error: uncaughtException: Cannot find module '../services/booking.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+Error: Cannot find module '../services/booking.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:212:19)
+    at Module.require (node:internal/modules/cjs/loader:1297:12)
+    at require (node:internal/modules/helpers:123:16)
+    at Object.<anonymous> (/Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js:6:27)
+    at Module._compile (node:internal/modules/cjs/loader:1460:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1544:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+2024-07-04T06:38:57.594Z [example-service] error: uncaughtException: Cannot find module '../services/booking.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+Error: Cannot find module '../services/booking.service'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:212:19)
+    at Module.require (node:internal/modules/cjs/loader:1297:12)
+    at require (node:internal/modules/helpers:123:16)
+    at Object.<anonymous> (/Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js:6:27)
+    at Module._compile (node:internal/modules/cjs/loader:1460:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1544:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+2024-07-04T06:39:02.577Z [example-service] error: uncaughtException: Cannot find module 'axios'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/util/priceCalculation.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+Error: Cannot find module 'axios'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/util/priceCalculation.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:212:19)
+    at Module.require (node:internal/modules/cjs/loader:1297:12)
+    at require (node:internal/modules/helpers:123:16)
+    at Object.<anonymous> (/Users/adithjain/Documents/projects/ACS_Projects/Backend/util/priceCalculation.js:2:15)
+    at Module._compile (node:internal/modules/cjs/loader:1460:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1544:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+2024-07-04T06:39:23.863Z [example-service] error: uncaughtException: Cannot find module '../services/car.services'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+Error: Cannot find module '../services/car.services'
+Require stack:
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/routes.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/app.js
+- /Users/adithjain/Documents/projects/ACS_Projects/Backend/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:212:19)
+    at Module.require (node:internal/modules/cjs/loader:1297:12)
+    at require (node:internal/modules/helpers:123:16)
+    at Object.<anonymous> (/Users/adithjain/Documents/projects/ACS_Projects/Backend/routes/car.router.js:20:5)
+    at Module._compile (node:internal/modules/cjs/loader:1460:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1544:10)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
