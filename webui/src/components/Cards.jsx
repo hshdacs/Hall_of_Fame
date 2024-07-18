@@ -1,19 +1,12 @@
 import React from 'react';
 import { Grid, CardActionArea, Box } from '@mui/material';
-import '../styles/Cards.css';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
 import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import appLogo from '../assets/card-image 1.png';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,16 +18,15 @@ const ProjectCards = ({ projects, page, onPageChange }) => {
     const navigate = useNavigate();
 
     const handleCardClick = (projectId) => {
-        console.log("projectId------------>",projectId)
         navigate(`/project/${projectId}`);
     };
 
     return (
         <>
-            <Grid container spacing={2} >
+            <Grid container spacing={2}>
                 {currentProjects.map((project, index) => (
                     <Grid item xs={12} sm={6} md={4} key={index}>
-                        <CardActionArea sx={{position:'none'}} onClick={() => handleCardClick(project.id)}>
+                        <CardActionArea onClick={() => handleCardClick(project._id)}>
                             <Card className="job-card" sx={{ maxWidth: 400 }}>
                                 <CardHeader
                                     avatar={
@@ -42,7 +34,6 @@ const ProjectCards = ({ projects, page, onPageChange }) => {
                                             {project.projectTitle.charAt(0)}
                                         </Avatar>
                                     }
-                                  
                                     title={project.projectTitle}
                                     subheader={new Date(project.createdDate).toLocaleDateString()}
                                 />
@@ -53,13 +44,10 @@ const ProjectCards = ({ projects, page, onPageChange }) => {
                                     alt="Project Image"
                                 />
                                 <CardContent>
-                                <Typography variant="body2" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                    <Typography variant="body2" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                                         {project.longDescription}
                                     </Typography>
                                 </CardContent>
-                                <CardActions disableSpacing>
-                                    
-                                </CardActions>
                             </Card>
                         </CardActionArea>
                     </Grid>

@@ -1,12 +1,31 @@
-// src/components/Filter.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, MenuItem, IconButton, Button, Box } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import axios from 'axios';
 
 const Filter = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [subMenuAnchorEl, setSubMenuAnchorEl] = useState({});
   const [showFilters, setShowFilters] = useState(false); // State to manage visibility of filter buttons
+  const [filterOptions, setFilterOptions] = useState({
+    schools: [],
+    studyProgrammes: [],
+    yearsOfBatch: [],
+    faculties: []
+  });
+
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        const response = await axios.get('http://localhost:8020/api/project/filter-options');
+        setFilterOptions(response.data);
+      } catch (error) {
+        console.error('Error fetching filter options', error);
+      }
+    };
+
+    fetchFilterOptions();
+  }, []);
 
   const handleMenuClick = (event, menu) => {
     setAnchorEl(event.currentTarget);
@@ -32,8 +51,9 @@ const Filter = () => {
             open={Boolean(subMenuAnchorEl.school)}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={handleMenuClose}>Bachelor's Degree</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Master's Degree</MenuItem>
+            {filterOptions.schools.map((school, index) => (
+              <MenuItem key={index} onClick={handleMenuClose}>{school}</MenuItem>
+            ))}
           </Menu>
 
           <Button onClick={(e) => handleMenuClick(e, 'programme')}>Study Programme</Button>
@@ -42,11 +62,9 @@ const Filter = () => {
             open={Boolean(subMenuAnchorEl.programme)}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={handleMenuClose}>Programme 1</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Programme 2</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Programme 3</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Programme 4</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Programme 5</MenuItem>
+            {filterOptions.studyProgrammes.map((programme, index) => (
+              <MenuItem key={index} onClick={handleMenuClose}>{programme}</MenuItem>
+            ))}
           </Menu>
 
           <Button onClick={(e) => handleMenuClick(e, 'year')}>Year of Batch</Button>
@@ -55,8 +73,8 @@ const Filter = () => {
             open={Boolean(subMenuAnchorEl.year)}
             onClose={handleMenuClose}
           >
-            {[...Array(15).keys()].map(year => (
-              <MenuItem key={year} onClick={handleMenuClose}>{2024 - year}</MenuItem>
+            {filterOptions.yearsOfBatch.map((year, index) => (
+              <MenuItem key={index} onClick={handleMenuClose}>{year}</MenuItem>
             ))}
           </Menu>
 
@@ -66,10 +84,9 @@ const Filter = () => {
             open={Boolean(subMenuAnchorEl.faculty)}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={handleMenuClose}>Faculty 1</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Faculty 2</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Faculty 3</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Faculty 4</MenuItem>
+            {filterOptions.faculties.map((faculty, index) => (
+              <MenuItem key={index} onClick={handleMenuClose}>{faculty}</MenuItem>
+            ))}
           </Menu>
         </Box>
       )}

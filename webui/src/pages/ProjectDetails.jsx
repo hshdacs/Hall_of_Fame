@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Typography } from '@mui/material';
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from 'react-responsive-carousel';
@@ -11,16 +11,30 @@ import { faArrowLeft, faBook } from '@fortawesome/free-solid-svg-icons';
 import reactIcon from '../assets/react.png';
 import nodeIcon from '../assets/node.png';
 import mongoIcon from '../assets/mongo.png';
-import techIcon from '../assets/tech1.png';
-
 import ProjectDescription from '../components/ProjectDescription';
+import axios from 'axios';
 
-const ProjectDetails = ({ projectData }) => {
+const ProjectDetails = () => {
     const [slide, setSlide] = useState(0);
     const { projectId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [project, setProject] = useState(location.state?.project);
 
-    const project = projectData.find((project) => project.id === projectId);
+    useEffect(() => {
+        const fetchProject = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8020/api/project/projects/${projectId}`);
+                setProject(response.data);
+            } catch (error) {
+                console.error('Error fetching project data', error);
+            }
+        };
+
+        if (!project) {
+            fetchProject();
+        }
+    }, [projectId, project]);
 
     if (!project) {
         return (
@@ -43,13 +57,13 @@ const ProjectDetails = ({ projectData }) => {
     };
 
     const handleBackToDashboard = () => {
-        navigate('/'); // Assuming '/dashboard' is the route for the dashboard
+        navigate('/'); // Assuming '/' is the route for the dashboard
     };
 
     return (
         <div>
             <Header />
-            <FontAwesomeIcon className='left-arrow' icon={faArrowLeft} size="2xl" onClick={handleBackToDashboard}/>
+            <FontAwesomeIcon className='left-arrow' icon={faArrowLeft} size="2xl" onClick={handleBackToDashboard} />
             <span className='previous_screen' onClick={handleBackToDashboard}>DASHBOARD</span>
             <div className='box'></div>
             <div>
@@ -88,18 +102,24 @@ const ProjectDetails = ({ projectData }) => {
             <div className="tech_container">
                 <p className='tech_title'>Technology Used</p>
                 <div className="tech_details">
-                    <div className="tech_item">
-                        <img src={reactIcon} alt="ReactJS Icon" className="tech_sub_icon" />
-                        <Typography variant="h6" sx={{'fontWeight':'bold'}}>ReactJs</Typography>
-                    </div>
-                    <div className="tech_item">
-                        <img src={nodeIcon} alt="NodeJS Icon" className="tech_sub_icon" />
-                        <Typography variant="h6" sx={{'fontWeight':'bold'}}>NodeJS</Typography>
-                    </div>
-                    <div className="tech_item">
-                        <img src={mongoIcon} alt="MongoDB Icon" className="tech_sub_icon" />
-                        <Typography variant="h6" sx={{'fontWeight':'bold'}}>MongoDB</Typography>
-                    </div>
+                    {project.technologiesUsed.includes("React") && (
+                        <div className="tech_item">
+                            <img src={reactIcon} alt="ReactJS Icon" className="tech_sub_icon" />
+                            <Typography variant="h6" sx={{ 'fontWeight': 'bold' }}>ReactJs</Typography>
+                        </div>
+                    )}
+                    {project.technologiesUsed.includes("Node.js") && (
+                        <div className="tech_item">
+                            <img src={nodeIcon} alt="NodeJS Icon" className="tech_sub_icon" />
+                            <Typography variant="h6" sx={{ 'fontWeight': 'bold' }}>NodeJS</Typography>
+                        </div>
+                    )}
+                    {project.technologiesUsed.includes("MongoDB") && (
+                        <div className="tech_item">
+                            <img src={mongoIcon} alt="MongoDB Icon" className="tech_sub_icon" />
+                            <Typography variant="h6" sx={{ 'fontWeight': 'bold' }}>MongoDB</Typography>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
