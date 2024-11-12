@@ -7,7 +7,6 @@ import CardContent from '@mui/material/CardContent';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
-import appLogo from '../assets/card-image 1.png';
 import { useNavigate } from 'react-router-dom';
 
 const ProjectCards = ({ projects, page, onPageChange }) => {
@@ -25,6 +24,7 @@ const ProjectCards = ({ projects, page, onPageChange }) => {
         <>
             <Grid container spacing={2}>
                 {currentProjects.map((project, index) => (
+              
                     <Grid item xs={12} sm={6} md={4} key={index}>
                         <CardActionArea onClick={() => handleCardClick(project._id)}>
                             <Card className="job-card" sx={{ maxWidth: 400 }}>
@@ -40,7 +40,7 @@ const ProjectCards = ({ projects, page, onPageChange }) => {
                                 <CardMedia
                                     component="img"
                                     height="194"
-                                    image={appLogo}
+                                    image={project.images && project.images[0] ? `${project.images[0]}` : '/images/jobpilot.png'}
                                     alt="Project Image"
                                 />
                                 <CardContent>

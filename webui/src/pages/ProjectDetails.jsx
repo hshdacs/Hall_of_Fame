@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Container, Typography } from '@mui/material';
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
+import { Container, Typography, Dialog, DialogContent, DialogTitle, IconButton, Box } from '@mui/material';
+import { CheckCircleOutline, ErrorOutline, Close } from '@mui/icons-material';
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from 'react-responsive-carousel';
 import Header from '../components/Header';
 import '../styles/ProjectDetails.css';
@@ -20,12 +21,23 @@ const ProjectDetails = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [project, setProject] = useState(location.state?.project);
+    const [isRunning, setIsRunning] = useState(false); // Track if the project is running
+    const [timeoutId, setTimeoutId] = useState(null);
+    const projectTabRef = useRef(null); // Ref to store the opened project tab
 
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [isSuccess, setIsSuccess] = useState(false);
     useEffect(() => {
         const fetchProject = async () => {
             try {
                 const response = await axios.get(`http://localhost:8020/api/project/projects/${projectId}`);
                 setProject(response.data);
+
+                // Optionally, check if the project is already running
+                if (response.data.isRunning) {
+                    setIsRunning(true);
+                }
             } catch (error) {
                 console.error('Error fetching project data', error);
             }
@@ -35,6 +47,12 @@ const ProjectDetails = () => {
             fetchProject();
         }
     }, [projectId, project]);
+
+    const showModal = (message, success) => {
+        setModalMessage(message);
+        setIsSuccess(success);
+        setModalOpen(true);
+    };
 
     if (!project) {
         return (
@@ -60,6 +78,82 @@ const ProjectDetails = () => {
         navigate('/'); // Assuming '/' is the route for the dashboard
     };
 
+    const handleRunProject = async (projectId) => {
+        try {
+            const response = await fetch(`http://localhost:8020/api/project/projects/${projectId}/start`, {
+                method: 'POST',
+            });
+            const data = await response.json();
+            if (response.ok) {
+                const projectUrl = data.projectUrl;
+                const projectTab = window.open(projectUrl, '_blank');
+                showModal('Project started.', true);
+
+                if (!projectTab) {
+                    showModal('Failed to open the project. Please allow pop-ups.', false);
+                    return;
+                }
+                
+                projectTabRef.current = projectTab; // Store the tab reference
+                setIsRunning(true);
+
+                // Start a timeout to stop the project after 5 minutes (300000 ms)
+                const timeout = setTimeout(() => {
+                    stopProject(projectId);
+                    closeTab(); 
+                }, 100000); // 300,000 milliseconds = 5 minutes
+                setTimeoutId(timeout);
+
+                // Check if the tab is closed and stop the project
+                const checkTabClosed = setInterval(() => {
+                    if (projectTab.closed) {
+                        clearInterval(checkTabClosed);
+                        stopProject(projectId);
+                    }
+                }, 1000);
+            } else {
+                showModal(data.error,false);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showModal('Failed to start project', false);
+
+        }
+    };
+
+    const stopProject = async (projectId) => {
+        try {
+            const response = await fetch(`http://localhost:8020/api/project/projects/${projectId}/stop`, {
+                method: 'POST',
+            });
+            const data = await response.json();
+            if (response.ok) {
+                showModal('Project stopped successfully.', true);
+                setIsRunning(false);
+
+                // Clear the timeout if it exists
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+            } else {
+                showModal(data.error, false);
+            }
+        } catch (error) {
+            console.error('Error stopping the project:', error);
+            showModal('Error stopping the project:', false);
+        }
+    };
+
+    const closeTab = () => {
+        if (projectTabRef.current && !projectTabRef.current.closed) {
+            projectTabRef.current.close(); // Close the tab
+        }
+    };
+
+    const handleCloseModal = () => {
+        setModalOpen(false);
+    };
+
     return (
         <div>
             <Header />
@@ -72,6 +166,24 @@ const ProjectDetails = () => {
                 </div>
                 <span className='project_title'>{project.projectTitle}</span>
             </div>
+            <Dialog open={modalOpen} onClose={handleCloseModal}>
+                <DialogTitle>
+                    <Box display="flex" alignItems="center">
+                        {isSuccess ? (
+                            <CheckCircleOutline color="success" sx={{ mr: 1 }} />
+                        ) : (
+                            <ErrorOutline color="error" sx={{ mr: 1 }} />
+                        )}
+                        {isSuccess ? 'Success' : 'Error'}
+                        <IconButton onClick={handleCloseModal} sx={{ ml: 'auto' }}>
+                            <Close />
+                        </IconButton>
+                    </Box>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>{modalMessage}</Typography>
+                </DialogContent>
+            </Dialog>
             <div className="carousel">
                 <BsArrowLeftCircleFill className="arrow arrow-left" onClick={prevSlide} />
                 <Carousel selectedItem={slide} showArrows={false} showIndicators={false} showStatus={false} showThumbs={false}>
@@ -94,7 +206,15 @@ const ProjectDetails = () => {
             </div>
             <div className="container">
                 <p className="description">YOU WILL LEARN ABOUT PROJECT</p>
-                <span><button className="run_btn">Run Project</button></span>
+                <span>
+                    <button 
+                        className="run_btn" 
+                        onClick={() => handleRunProject(projectId)} 
+                        disabled={isRunning} // Disable the button if the project is running
+                    >
+                        {isRunning ? "Running" : "Run Project"} {/* Change button label */}
+                    </button>
+                </span>
             </div>
             <div className="desc_container">
                 <ProjectDescription description={project.longDescription} />
