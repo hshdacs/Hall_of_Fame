@@ -10,6 +10,7 @@
     "prettier:check": "prettier -c '**/*.js'",
     "prettier:format": "prettier -w '**/*.{js,json}'"
   },
+  
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -17,10 +18,14 @@
   "dependencies": {
     "axios": "^1.7.2",
     "cors": "^2.8.5",
+    "dockerode": "^4.0.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-validator": "^7.1.0",
+    "get-port": "^7.1.0",
     "mongoose": "^8.4.4",
+    "open": "^10.1.0",
+    "tcp-port-used": "^1.0.2",
     "winston": "^3.13.0",
     "winston-daily-rotate-file": "^5.0.0"
   }

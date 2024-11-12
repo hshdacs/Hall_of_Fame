@@ -1,6 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const Project = require('../db/model/schema');
+const Project = require('../db/model/projectSchema.js');
+const Configuration = require('../db/model/configSchema.js');
+const Docker = require('dockerode');
+const docker = new Docker();
+const mongoose = require('mongoose');
+const path = require('path');
+const exec = require('child_process').exec;
 
 // Get all projects with optional filters
 router.get('/projects', async (req, res) => {
@@ -131,5 +137,130 @@ router.get('/filter-options', async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
+
+const projectRoot = path.resolve(__dirname, '../../');
+
+router.post('/projects/:id/start', async (req, res) => {
+    const projectId = req.params.id;
+
+    try {
+        const objectId = new mongoose.Types.ObjectId(projectId);
+        
+        // Find configuration for the project ID
+        const configuration = await Configuration.findOne({ projectId: objectId });
+        
+        if (!configuration) {
+            return res.status(400).json({ error: 'Invalid project ID or configuration not found.' });
+        }
+
+        // Access the serviceName array
+        const services = configuration.serviceName;
+
+        if (!services || services.length === 0) {
+            return res.status(400).json({ error: 'No services configured for this project.' });
+        }
+
+        // Run Docker Compose command for each service
+        for (const service of services) {
+            exec(`docker-compose up -d ${service.name}`, { cwd: projectRoot }, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`exec error: ${error}`);
+                    return res.status(500).json({ error: `Failed to start service ${service.name}` });
+                }
+            });
+        }
+
+        // Find the port of the front-end service dynamically
+        const frontendService = services.find(service => service.type === 'frontend');
+        if (!frontendService) {
+            return res.status(400).json({ error: 'No front-end service configured for this project.' });
+        }
+
+        const { port } = frontendService;
+
+        // Open the browser with the front-end port
+        const { default: open } = await import('open');
+        const url = `http://localhost:${port}`;
+        //await open(url);
+
+        res.status(200).json({ message: 'Project started successfully and browser opened.' , projectUrl: url });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.post('/projects/:id/stop', async (req, res) => {
+    const projectId = req.params.id;
+
+    try {
+        const objectId = new mongoose.Types.ObjectId(projectId);
+        
+        // Find configuration for the project ID
+        const configuration = await Configuration.findOne({ projectId: objectId });
+        
+        if (!configuration) {
+            return res.status(400).json({ error: 'Invalid project ID or configuration not found.' });
+        }
+
+        // Access the serviceName array
+        const services = configuration.serviceName;
+
+        if (!services || services.length === 0) {
+            return res.status(400).json({ error: 'No services configured for this project.' });
+        }
+
+        // Run Docker Compose command to stop each service
+        for (const service of services) {
+            exec(`docker-compose down ${service.name}`, { cwd: projectRoot }, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`exec error while stopping service ${service.name}: ${error}`);
+                } else {
+                    console.log(`Service ${service.name} stopped successfully.`);
+                }
+            });
+        }
+
+        res.status(200).json({ message: 'Project stopped successfully.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+module.exports = router;
+
+router.post('/config', async (req, res) => {
+    try {
+        // Assuming the project details and services come from the request body
+        const { projects } = req.body; // Expecting an array of projects
+        console.log("req.body----------->", req.body);
+        const configurations = projects.map(project => ({
+            projectId: new mongoose.Types.ObjectId(project.projectId), // Convert projectId to ObjectId
+        
+            serviceName: project.serviceName.map(service => ({
+                name: service.name,
+                dockerFile: service.dockerFile,
+                port: service.port,
+                type: service.type
+            })),
+            dockerFiles: project.dockerFiles.map(file => ({
+                fileName: file.fileName,
+                content: file.content
+            }))
+        }));
+
+        console.log("configurations------------->", configurations);
+        // Insert configurations into the Configuration collection
+        await Configuration.save(configurations);
+
+        res.status(200).json({ message: 'Configurations stored successfully.' });
+    } catch (err) {
+        console.error('Error storing configurations:', err);
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+});
+
 
 module.exports = router;
