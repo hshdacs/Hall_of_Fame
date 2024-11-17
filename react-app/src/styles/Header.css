@@ -1,0 +1,52 @@
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #000000;
+    box-shadow: 0px 5px 10px #979797;
+  }
+  
+  .app-logo {
+    height: 50px; 
+  }
+  
+  .right-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .header-buttons {
+    display: flex;
+    margin-right: 20px;
+  }
+  
+  .header-button {
+    background-color: #eeeeee;
+    color: #000000;
+    padding: 8px 16px;
+    text-transform: none;
+    border: 1px solid #666666;
+    border-radius: 4px;
+    margin: 0 10px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .header-button:hover,
+  .header-button.active {
+    background-color: #000000; 
+    color: #eeeeee;
+    border-color: #666666;
+  }
+  
+  .profile-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .profile-pic {
+    height: 50px; 
+    border-radius: 50%; 
+    margin-left: 10px; 
+  }
+  

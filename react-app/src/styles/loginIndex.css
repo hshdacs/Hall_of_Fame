@@ -1,0 +1,193 @@
+
+.navbar {
+    justify-content: space-around;
+    display: flex;
+    align-items: center;
+    width:100%;
+    height:70px;
+    z-index: 999;
+    position: relative;
+}
+
+.fontBold {
+    font-weight: 800;
+    font-size: 35px;
+    color:black;
+    line-height: 2.75rem;
+}
+
+
+.container1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;  
+    height: 82vh;
+}
+
+.box {
+    border-radius: 13px;
+    width: 70%;
+    box-shadow: 10px 10px 6px 6px #979797;
+    height: 70%;
+    margin-bottom: 18px;
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+}
+
+.login-with-google-btn {
+    transition: background-color .3s, box-shadow .3s;
+    cursor: pointer;
+    margin-top: 150px;
+    margin-left: 300px;
+    padding: 12px 16px 12px 42px;
+    border: none;
+    border-radius: 3px;
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, .04), 0 1px 1px rgba(0, 0, 0, .25);
+    margin-bottom: 250px;
+    color: #757575;
+    font-size: 20px;
+    font-weight: 500;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
+    
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=);
+    background-color: white;
+    background-repeat: no-repeat;
+    background-position: 12px 11px;
+    
+    &:hover {
+      box-shadow: 0 -1px 0 rgba(0, 0, 0, .04), 0 2px 4px rgba(0, 0, 0, .25);
+    }
+    
+    &:active {
+      background-color: #eeeeee;
+    }
+    
+    &:focus {
+      outline: none;
+      box-shadow: 
+        0 -1px 0 rgba(0, 0, 0, .04),
+        0 2px 4px rgba(0, 0, 0, .25),
+        0 0 0 3px #c8dafc;
+    }
+  
+  }
+
+
+.title {
+    font-size: 35px;
+    color:#eeeeee;
+    font-weight: bold;
+    margin-right:621px
+}
+
+.card-carousel {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 200px;
+  margin: 0px;
+  align-items: end;
+  position: relative;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #eeeeee;
+  padding: 30px;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  height: 180px;
+  transition: all 0.75s ease;
+  opacity: 0;
+  position: absolute;
+  transform: scale(0.85) translateY(50px);
+}
+
+/* .card h2,
+.card p {
+  line-height: 1.5;
+  margin: 0;
+} */
+
+.card.active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  box-shadow: 0 30px 20px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.card.next {
+  opacity: 1;
+  z-index: 0;
+}
+
+.card.prev {
+  transform: scale(1.1) translateY(-50px);
+  z-index: 2;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.background-image {
+  position: absolute;
+  top: 20px;
+  right: 167px;
+  bottom: 0;
+  width: 50%;
+  background-image: url('../../src/assets/searchImage.png');
+  background-size: cover;
+  background-position: center;
+  max-height: 550px;
+  max-width: 450px;
+}
+
+/* issue might be here */
+.appContainer {
+  font-family: 'Arial', sans-serif;
+  color: #333333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #474E5D;
+}
+
+
+.card-text {
+  font-size: 24px;
+  font-weight: bold;
+  font-family: math;
+  margin-left: 0px;
+  margin-top: -187px;
+}
+
+
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.openAI {
+  font-size: 18px;
+  font-weight: bold;
+  font-family: math;
+  margin-left: 0px;
+  margin-top: -187px;
+  font-variant: common-ligatures tabular-nums;
+} 
+
+.jobCard {
+  font-size: 16px;
+  font-weight: bold;
+  font-family: math;
+  margin-left: 0px;
+  margin-top: -187px;
+  font-variant: common-ligatures tabular-nums;
+}

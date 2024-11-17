@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  react-app:
+    build:
+      context: ./react-app
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+  # Add other sub-projects as needed
+  angular-backend:
+    build:
+      context: ./angular-app/backend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+
+  angular-webui:
+    build:
+      context: ./angular-app/webui
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"

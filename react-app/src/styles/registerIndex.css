@@ -1,0 +1,252 @@
+
+.navbar {
+    justify-content: space-around;
+    display: flex;
+    align-items: center;
+    width:100%;
+    height:70px;
+    z-index: 999;
+    position: relative;
+}
+
+.signButton {
+    font-weight: 500;
+    font-size: .875rem;
+    line-height: 1.25rem;
+    text-align: center;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    background-color: white;
+    border-color: black;
+    border-radius: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    display: inline-flex;
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+.font-bold {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color:black;
+    line-height: 1.75rem;
+}
+
+
+.container {
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+    min-width: 100vw;
+    min-height: 70vh;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.bg-white  {
+    --tw-bg-opacity: 1;
+    background-color: rgb(255 255 255/var(--tw-bg-opacity));
+}
+
+.text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.h-1 {
+    height: 40px;
+}
+
+.S9gUrf-YoZ4jf {
+    position: relative;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.my-5 {
+    text-align: center;
+    justify-content: flex-start;
+    align-items: center;
+    display: flex;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.mx-4 {
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+
+
+.bg-gray-200 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(229 231 235/var(--tw-bg-opacity));
+}
+
+.h-5{
+height: 0.5px;
+}
+
+.OAuth {
+    display: block;
+    position: relative;
+    top: 0px;
+    left: 0px;
+    height: 44px;
+    width: 203px;
+    border: 0px;
+    margin: -2px -10px;
+}
+
+
+.emailInput {
+    border: 0;
+    --tw-bg-opacity: 1;
+    background-color: rgb(241 245 249/var(--tw-bg-opacity));
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-radius: 0.375rem;
+    width:93%;
+    font-family: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+    margin: 0px;
+    outline: none; 
+}
+
+.passwordInput {
+    border: 0;
+    --tw-bg-opacity: 1;
+    background-color: rgb(241 245 249/var(--tw-bg-opacity));
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-radius: 0.375rem;
+    width:93%;
+    margin-top: 0.5rem;
+    font-family: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+    outline: none; 
+}
+
+.button {
+    --tw-bg-opacity: 1;
+    background-color: rgb(0 0 0/var(--tw-bg-opacity));
+    --tw-text-opacity: 1;
+    color: rgb(255 255 255/var(--tw-text-opacity));
+    border: 0;
+    cursor: pointer;
+    border: 0;
+    --tw-border-opacity: 1;
+    border-color: rgb(0 0 0/var(--tw-border-opacity));
+    font-weight: 500;
+    border-radius: 0.5rem;
+    font-size: .875rem;
+    line-height: 1.25rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    width:100%;
+    margin-top: 0.5rem;
+}
+
+.underline {
+    text-decoration-line: underline;
+    --tw-text-opacity: 1;
+    color: rgb(59 130 246/var(--tw-text-opacity));
+    font-size: .875rem;
+}
+
+.text-blue-500 {
+    font-size: .875rem;
+}
+
+.flex {
+    display: flex;
+  }
+  
+  .mr-2 {
+    margin-right: 0.5rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+   
+  }
+  
+  .ml-2 {
+    margin-left: 0.5rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.inputField1 {
+    border: 0;
+    --tw-bg-opacity: 1;
+    background-color: rgb(241 245 249/var(--tw-bg-opacity));
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-radius: 0.375rem;
+    font-family: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+    margin: 0px;
+    outline: none; 
+    margin-left: -7px;
+    width: 100%;
+}
+
+.inputField2 {
+    border: 0;
+    --tw-bg-opacity: 1;
+    background-color: rgb(241 245 249/var(--tw-bg-opacity));
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-radius: 0.375rem;
+    font-family: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+    margin: 0px;
+    outline: none; 
+    width: 100%;
+    margin-left: 15px;
+}
+

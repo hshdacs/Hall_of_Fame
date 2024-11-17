@@ -1,0 +1,49 @@
+.job-card {
+    max-width: 300px;
+    height: 100%; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: box-shadow 0.3s;
+  }
+
+   .job-card:hover {
+    /* border-bottom-right-radius: 50px;
+    border-top-left-radius: 50px; */
+    transform: scale(1.05);
+    box-shadow: 0 6px 11px 0 rgba(0, 0, 0, 0.996);
+   }
+   
+
+   
+  .card-action-area {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  
+  .pagination-button {
+    border: none;
+    background-color: transparent;
+    padding: 10px;
+    margin: 0 5px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #000000;
+    border-radius: 4px;
+  }
+  
+  .pagination-button:hover,
+  .pagination-button:focus {
+    text-decoration: underline;
+    background-color: #979797;
+  }
+  
+  .pagination-button:disabled,
+  .pagination-button.active {
+    color: #eeeeee;
+    cursor: not-allowed;
+  }
+  

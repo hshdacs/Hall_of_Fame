@@ -1,0 +1,42 @@
+.about-section {
+    padding: 50px;
+    text-align: center;
+    color:#eeeeee ;
+  }
+  
+  .team-section {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .team-card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    margin: 16px;
+    width: 300px;
+    background-color: #000000;
+  }
+  
+  .team-card img {
+    width: 100%;
+    height: auto;
+  }
+  
+  .team-card .container {
+    padding: 16px;
+    text-align: center;
+  }
+
+  .team-card title{
+    color :#eeeeee;
+  }
+  
+  .team-card h2 {
+    margin-top: 0;
+    margin-bottom: 30px;
+  }
+  
+  .team-card p {
+    margin: 0;
+  }
+  

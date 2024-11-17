@@ -1,0 +1,16 @@
+.app-container {
+    font-family: 'Arial', sans-serif;
+    color: #333333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #474e5d;
+    width: 70%
+  }
+  
+  .page-content {
+    flex-grow: 1;
+    /* padding: 24px; */
+    
+  }
+  
