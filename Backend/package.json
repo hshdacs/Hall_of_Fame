@@ -10,7 +10,6 @@
     "prettier:check": "prettier -c '**/*.js'",
     "prettier:format": "prettier -w '**/*.{js,json}'"
   },
-  
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -28,5 +27,8 @@
     "tcp-port-used": "^1.0.2",
     "winston": "^3.13.0",
     "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
