@@ -2,7 +2,7 @@
 # SRH Centralized Student Project Platform — Technical Documentation (v1)
 
 **Author:** Manoj Padmanabha  
-**Last Updated:** 2025-10-30
+**Last Updated:** 30.10.2025
 
 ---
 
@@ -476,6 +476,6 @@ volumes: { mongo_data: {} }
 
 ## 24. License & Repository Info
 
-This project is maintained by SRH University Heidelberg for educational use.
+This project is maintained by SRH Hochschule Heidelberg for educational use.
 License: MIT License (or as per SRH internal policy).
 Repository URL: https://github.com/hshdacs/Hall_of_Fame.git
