@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const multer = require('multer');
 const mongoose = require('mongoose');
 const path = require('path');
 const { exec } = require('child_process');
@@ -8,9 +8,15 @@ const docker = new Docker();
 
 const Project = require('../db/model/projectSchema.js');
 const Configuration = require('../db/model/configSchema.js');
-const logger = console; // replace with winston logger later
+const { buildAndDeployProject } = require('../services/buildService'); // ✅ import new service
 
-// Helper: handle async routes safely
+const router = express.Router();
+const logger = console; // you can replace with winston later
+
+// Multer setup
+const upload = multer({ dest: 'uploads/' });
+
+// Helper: async wrapper
 const asyncHandler = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -26,9 +32,66 @@ const getProjectConfig = async (projectId) => {
   return config.serviceName;
 };
 
-// === CRUD ROUTES ===
+// ========================
+// 🚀 NEW: Upload + Auto Build/Deploy
+// ========================
+router.post(
+  '/upload',
+  upload.single('file'),
+  asyncHandler(async (req, res) => {
+    try {
+      const { githubUrl, projectTitle, description } = req.body;
+      let sourceType, sourcePathOrUrl;
 
-// Get all projects (with filters)
+      if (req.file) {
+        sourceType = 'zip';
+        sourcePathOrUrl = req.file.path;
+      } else if (githubUrl) {
+        sourceType = 'github';
+        sourcePathOrUrl = githubUrl;
+      } else {
+        return res
+          .status(400)
+          .json({ message: 'Please upload a ZIP file or provide a GitHub URL' });
+      }
+
+      // Save metadata first
+      const project = await Project.create({
+        projectTitle,
+        longDescription: description,
+        sourceType,
+        sourcePathOrUrl,
+        status: 'queued',
+        createdDate: new Date(),
+      });
+
+      // Run build and deploy
+      const result = await buildAndDeployProject(
+        project._id,
+        sourceType,
+        sourcePathOrUrl
+      );
+
+      res.status(200).json({
+        message: result.success
+          ? '✅ Project built and deployed successfully!'
+          : '❌ Build failed',
+        projectId: project._id,
+        url: result.url || null,
+        error: result.error || null,
+      });
+    } catch (err) {
+      console.error('Upload error:', err);
+      res.status(500).json({ message: 'Internal Server Error', error: err.message });
+    }
+  })
+);
+
+// ========================
+// 🧩 CRUD ROUTES
+// ========================
+
+// Get all projects
 router.get(
   '/projects',
   asyncHandler(async (req, res) => {
@@ -54,24 +117,11 @@ router.get(
   })
 );
 
-// Create new project
+// Create new project (manual entry)
 router.post(
   '/projects',
   asyncHandler(async (req, res) => {
-    const project = new Project({
-      projectTitle: req.body.projectTitle,
-      createdDate: req.body.createdDate,
-      longDescription: req.body.longDescription,
-      images: req.body.images,
-      technologiesUsed: req.body.technologiesUsed,
-      githubUrl: req.body.githubUrl,
-      dockerImageUrl: req.body.dockerImageUrl,
-      school: req.body.school,
-      studyProgramme: req.body.studyProgramme,
-      yearOfBatch: req.body.yearOfBatch,
-      faculty: req.body.faculty,
-    });
-
+    const project = new Project(req.body);
     const newProject = await project.save();
     res.status(201).json(newProject);
   })
@@ -102,7 +152,7 @@ router.delete(
   })
 );
 
-// === FILTER OPTIONS ===
+// Filter options
 router.get(
   '/filter-options',
   asyncHandler(async (req, res) => {
@@ -115,17 +165,18 @@ router.get(
   })
 );
 
-// === DOCKER START / STOP ===
+// ========================
+// ⚙️ DOCKER START / STOP
+// ========================
 const projectRoot = path.resolve(__dirname, '../../');
 
-// Start project
+// Start project (manual trigger)
 router.post(
   '/projects/:id/start',
   asyncHandler(async (req, res) => {
     const projectId = req.params.id;
     const services = await getProjectConfig(projectId);
 
-    // Run docker-compose up for all services concurrently
     await Promise.all(
       services.map((service) => {
         const safeName = service.name.replace(/[^a-zA-Z0-9-_]/g, '');
@@ -147,7 +198,6 @@ router.post(
       })
     );
 
-    // Find frontend port
     const frontend = services.find((s) => s.type === 'frontend');
     if (!frontend) return res.status(400).json({ error: 'No frontend service found.' });
 
@@ -190,7 +240,9 @@ router.post(
   })
 );
 
-// === SAVE CONFIGURATION ===
+// ========================
+// 🧩 SAVE CONFIGURATION
+// ========================
 router.post(
   '/config',
   asyncHandler(async (req, res) => {
@@ -218,7 +270,9 @@ router.post(
   })
 );
 
-// === ERROR HANDLING MIDDLEWARE ===
+// ========================
+// 🚨 ERROR HANDLER
+// ========================
 router.use((err, req, res, next) => {
   logger.error(`❌ ${err.message}`);
   res.status(500).json({ error: err.message || 'Internal Server Error' });
