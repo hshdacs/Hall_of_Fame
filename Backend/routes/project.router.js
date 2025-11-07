@@ -68,19 +68,32 @@ router.post(
           .json({ message: "Please upload a ZIP file or provide a GitHub URL" });
       }
 
-      // Save project metadata first
-      const project = await Project.create({
-        studentName,
-        regNumber,
-        batch,
-        course,
-        projectTitle,
-        longDescription: description,
-        sourceType,
-        sourcePathOrUrl,
-        status: "queued",
-        createdDate: new Date(),
-      });
+// Check if a project already exists for this student (same regNumber)
+      let project = await Project.findOne({ regNumber });
+
+      // If found, update existing document instead of creating new one
+      if (project) {
+        project.projectTitle = projectTitle;
+        project.longDescription = description;
+        project.sourceType = sourceType;
+        project.sourcePathOrUrl = sourcePathOrUrl;
+        project.status = "queued";
+        project.createdDate = new Date();
+        await project.save();
+      } else {
+        project = await Project.create({
+          studentName,
+          regNumber,
+          batch,
+          course,
+          projectTitle,
+          longDescription: description,
+          sourceType,
+          sourcePathOrUrl,
+          status: "queued",
+          createdDate: new Date(),
+        });
+      }
 
       // Start build + deploy
       const result = await buildAndDeployProject(
