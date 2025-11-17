@@ -39,6 +39,8 @@ const getProjectConfig = async (projectId) => {
 // ==============================
 // 🚀 Upload + Auto Build/Deploy
 // ==============================
+const buildQueue = require("../queue/buildQueue"); // ✅ Import queue at top
+
 router.post(
   "/upload",
   upload.single("file"),
@@ -68,10 +70,9 @@ router.post(
           .json({ message: "Please upload a ZIP file or provide a GitHub URL" });
       }
 
-// Check if a project already exists for this student (same regNumber)
+      // 🧩 Check for existing project
       let project = await Project.findOne({ regNumber });
 
-      // If found, update existing document instead of creating new one
       if (project) {
         project.projectTitle = projectTitle;
         project.longDescription = description;
@@ -95,20 +96,16 @@ router.post(
         });
       }
 
-      // Start build + deploy
-      const result = await buildAndDeployProject(
-        project._id,
-        sourceType,
-        sourcePathOrUrl
-      );
-
-      res.status(200).json({
-        message: result.success
-          ? "✅ Project built and deployed successfully!"
-          : "❌ Build failed",
+      // 🕒 Instead of running directly, queue the build in Redis
+      await buildQueue.add({
         projectId: project._id,
-        url: result.url || null,
-        error: result.error || null,
+        sourceType,
+        sourcePathOrUrl,
+      });
+
+      res.status(202).json({
+        message: "🕒 Build job queued successfully.",
+        projectId: project._id,
       });
     } catch (err) {
       logger.error("❌ Upload error:", err);
@@ -118,6 +115,7 @@ router.post(
     }
   })
 );
+
 
 // ==============================
 // 🧩 CRUD ROUTES
