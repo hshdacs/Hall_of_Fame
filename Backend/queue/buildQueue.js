@@ -6,7 +6,7 @@ const { buildAndDeployProject } = require("../services/buildService");
 const buildQueue = new Queue("buildQueue", process.env.REDIS_URL);
 
 // Process each job in the queue
-buildQueue.process(async (job) => {
+buildQueue.process(10, async (job) => {
   const { projectId, sourceType, sourcePathOrUrl } = job.data;
   console.log(`⚙️ Processing build for project: ${projectId}`);
 
