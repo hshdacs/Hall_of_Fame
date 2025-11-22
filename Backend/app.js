@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+
 const routes = require('./routes/routes');
 const projectRoutes = require('./routes/project.router');
 
@@ -8,8 +9,8 @@ const { ExpressAdapter } = require('@bull-board/express');
 const { createBullBoard } = require('@bull-board/api');
 const { BullAdapter } = require('@bull-board/api/bullAdapter');
 
-// Import your queue instance
-const { buildQueue } = require('./services/buildService'); // ✅ check correct path
+// ✅ Correct queue import
+const buildQueue = require('./queue/buildQueue');
 
 const app = express();
 
@@ -23,19 +24,22 @@ app.get('/', (req, res) => res.send('API running successfully 🚀'));
 app.use('/', routes);
 app.use('/api/project', projectRoutes);
 
-// ✅ Proper Bull Board setup
+// ===============================
+// 🚀 BULL BOARD SETUP (fixed)
+// ===============================
 const serverAdapter = new ExpressAdapter();
-serverAdapter.setBasePath('/admin/queues'); // this ensures assets load correctly
+serverAdapter.setBasePath('/admin/queues');
 
 createBullBoard({
-  queues: [new BullAdapter(buildQueue)],
+  queues: [
+    new BullAdapter(buildQueue),  // ✔ real Bull Queue instance
+  ],
   serverAdapter,
 });
 
-// ⚠️ This must come AFTER your other app.use() routes
 app.use('/admin/queues', serverAdapter.getRouter());
 
-// Error handling middleware (keep at bottom)
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled Error:', err.stack);
   res.status(500).json({ message: 'Internal Server Error' });

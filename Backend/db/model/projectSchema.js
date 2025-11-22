@@ -3,11 +3,11 @@ const mongoose = require("mongoose");
 const projectSchema = new mongoose.Schema({
   // 🧑‍🎓 Student Information
   studentName: { type: String, required: true },
-  regNumber: { type: String, required: true, unique: false },
+  regNumber: { type: String, required: true },
   batch: { type: String },
   course: { type: String },
 
-  // 🎓 University Metadata (SRH fields)
+  // 🎓 SRH Metadata
   school: { type: String },
   studyProgramme: { type: String },
   yearOfBatch: { type: Number },
@@ -17,40 +17,51 @@ const projectSchema = new mongoose.Schema({
   projectTitle: { type: String, required: true },
   longDescription: { type: String },
   githubUrl: { type: String },
-  sourceType: { type: String },
+  sourceType: { type: String }, // github | zip
   sourcePathOrUrl: { type: String },
 
   // 🐳 Deployment & Build Info
-  imageName: { type: String },
-  containerId: { type: String },
-  port: { type: Number },
+  imageTag: { type: String },          // NEW
+  containerName: { type: String },     // NEW
+  hostPort: { type: Number },          // NEW
+  internalPort: { type: Number },      // NEW (default 80)
+  
   url: { type: String },
+
   status: {
     type: String,
-    enum: ["queued", "running", "failed", "stopped", "build_failed"],
+    enum: [
+      "queued",
+      "building",
+      "ready",
+      "running",
+      "stopped",
+      "failed",
+      "build_failed"
+    ],
     default: "queued",
   },
 
-  // 🧾 Build Logs
+  // 🧾 Logs
   logs: {
     build: { type: String, default: "" },
     deploy: { type: String, default: "" },
   },
 
-  // 🕒 Audit Fields
+  // 🕒 Audit
   createdDate: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 
-  // 🧠 Optional: frontend-related fields
+  // 🧠 Image carousel for frontend
   images: [{ type: String }],
   technologiesUsed: [{ type: String }],
 
-  // 🧩 Future: Track rebuild history
+  // 🧩 Build History
   buildHistory: [
     {
       timestamp: { type: Date, default: Date.now },
       status: { type: String },
-      message: { type: String },
+      message: { type: String }
     },
   ],
 });
