@@ -6,70 +6,52 @@ import ProjectCards from '../components/Cards';
 import { Container } from '@mui/material';
 import SearchBar from '../components/Search';
 import '../styles/Dashboard.css';
-import Filter from '../components/Filter'; // Import the Filter component
+import Filter from '../components/Filter';
 
 const Dashboard = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [projects, setProjects] = useState([]);
-    const navigate = useNavigate(); // Initialize useNavigate hook
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [projects, setProjects] = useState([]);
+  const navigate = useNavigate();
 
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get('http://localhost:8020/api/project/all');
+        setProjects(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.error("Error fetching project data", error);
+        setProjects([]);
+      }
     };
 
-    const handleSearchExecute = (e) => {
-        e.preventDefault();
-    };
+    fetchProjects();
+  }, []);
 
-    const handlePageChange = (newPage) => {
-        setCurrentPage(newPage);
-    };
+  const filteredProjects = projects.filter((p) =>
+    p.projectTitle?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-    // Fetch projects from the API
-    useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const response = await axios.get('http://localhost:8020/api/project/projects');
-                setProjects(response.data);
-            } catch (error) {
-                console.error('Error fetching project data', error);
-            }
-        };
+  return (
+    <div>
+      <Header />
+      <h1 className='header-text'>Explore All Projects Here!</h1>
 
-        fetchProjects();
-    }, []);
-
-    // Filter projects based on search term
-    const filteredProjects = projects.filter((project) =>
-        project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    return (
-        <div>
-            <Header />
-            <div>
-                <h1 className='header-text'>Explore All Projects Here!</h1>
-                <Container className='appContainer'>
-                    <div className='filter'>
-                        <SearchBar
-                            className='search-button'
-                            searchTerm={searchTerm}
-                            onSearchChange={handleSearchChange}
-                            onSearchExecute={handleSearchExecute}
-                        />
-                        <Filter />
-                    </div>
-                    <ProjectCards
-                        projects={filteredProjects}
-                        page={currentPage}
-                        onPageChange={handlePageChange}
-                        onCardClick={(projectId) => navigate(`/project/${projectId}`)}
-                    />
-                </Container>
-            </div>
+      <Container className='appContainer'>
+        <div className='filter'>
+          <SearchBar searchTerm={searchTerm} onSearchChange={(e) => setSearchTerm(e.target.value)} />
+          <Filter />
         </div>
-    );
+
+        <ProjectCards
+          projects={filteredProjects}
+          page={currentPage}
+          onPageChange={setCurrentPage}
+          onCardClick={(projectId) => navigate(`/project/${projectId}`)}
+        />
+      </Container>
+    </div>
+  );
 };
 
 export default Dashboard;

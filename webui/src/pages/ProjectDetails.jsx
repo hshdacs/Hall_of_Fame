@@ -28,25 +28,19 @@ const ProjectDetails = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
-    useEffect(() => {
-        const fetchProject = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8020/api/project/projects/${projectId}`);
-                setProject(response.data);
+useEffect(() => {
+  const fetchProject = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8020/api/project/details/${projectId}`);
+      setProject(response.data);
+      setIsRunning(response.data.status === "running");
+    } catch (error) {
+      console.error("Error fetching project data", error);
+    }
+  };
 
-                // Optionally, check if the project is already running
-                if (response.data.isRunning) {
-                    setIsRunning(true);
-                }
-            } catch (error) {
-                console.error('Error fetching project data', error);
-            }
-        };
-
-        if (!project) {
-            fetchProject();
-        }
-    }, [projectId, project]);
+  if (!project) fetchProject();
+}, [projectId, project]);
 
     const showModal = (message, success) => {
         setModalMessage(message);
@@ -78,81 +72,52 @@ const ProjectDetails = () => {
         navigate('/'); // Assuming '/' is the route for the dashboard
     };
 
-    const handleRunProject = async (projectId) => {
-        try {
-            const response = await fetch(`http://localhost:8020/api/project/projects/${projectId}/start`, {
-                method: 'POST',
-            });
-            const data = await response.json();
-            if (response.ok) {
-                const projectUrl = data.projectUrl;
-                const projectTab = window.open(projectUrl, '_blank');
-                showModal('Project started.', true);
+const handleRunProject = async (projectId) => {
+  try {
+    const response = await fetch(`http://localhost:8020/api/project/run/${projectId}`, {
+      method: "POST",
+    });
 
-                if (!projectTab) {
-                    showModal('Failed to open the project. Please allow pop-ups.', false);
-                    return;
-                }
-                
-                projectTabRef.current = projectTab; // Store the tab reference
-                setIsRunning(true);
+    const data = await response.json();
 
-                // Start a timeout to stop the project after 5 minutes (300000 ms)
-                const timeout = setTimeout(() => {
-                    stopProject(projectId);
-                    closeTab(); 
-                }, 100000); // 300,000 milliseconds = 5 minutes
-                setTimeoutId(timeout);
-
-                // Check if the tab is closed and stop the project
-                const checkTabClosed = setInterval(() => {
-                    if (projectTab.closed) {
-                        clearInterval(checkTabClosed);
-                        stopProject(projectId);
-                    }
-                }, 1000);
-            } else {
-                showModal(data.error,false);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showModal('Failed to start project', false);
-
-        }
-    };
+    if (response.ok) {
+      const projectTab = window.open(data.url, "_blank");
+      showModal("Project started.", true);
+      setIsRunning(true);
+      projectTabRef.current = projectTab;
+    } else {
+      showModal(data.error, false);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    showModal("Failed to start project", false);
+  }
+};
 
     const stopProject = async (projectId) => {
-        try {
-            const response = await fetch(`http://localhost:8020/api/project/projects/${projectId}/stop`, {
-                method: 'POST',
-            });
-            const data = await response.json();
-            if (response.ok) {
-                showModal('Project stopped successfully.', true);
-                setIsRunning(false);
+  try {
+    const response = await fetch(`http://localhost:8020/api/project/stop/${projectId}`, {
+      method: "POST",
+    });
 
-                // Clear the timeout if it exists
-                if (timeoutId) {
-                    clearTimeout(timeoutId);
-                }
-            } else {
-                showModal(data.error, false);
-            }
-        } catch (error) {
-            console.error('Error stopping the project:', error);
-            showModal('Error stopping the project:', false);
-        }
-    };
+    const data = await response.json();
 
-    const closeTab = () => {
-        if (projectTabRef.current && !projectTabRef.current.closed) {
-            projectTabRef.current.close(); // Close the tab
-        }
-    };
+    if (response.ok) {
+      showModal("Project stopped successfully.", true);
+      setIsRunning(false);
+    } else {
+      showModal(data.error, false);
+    }
 
-    const handleCloseModal = () => {
-        setModalOpen(false);
-    };
+  } catch (error) {
+    console.error("Error stopping project:", error);
+    showModal("Error stopping the project", false);
+  }
+};
+
+const handleCloseModal = () => {
+    setModalOpen(false);
+};
 
     return (
         <div>
