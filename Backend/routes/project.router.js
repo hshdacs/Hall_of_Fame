@@ -10,8 +10,9 @@ const { stopProject } = require("../services/stopProject");
 
 const upload = multer({ dest: "uploads/" });
 
+
 // =====================================================
-// 1️⃣ STUDENT PROJECT UPLOAD  (AUTO-BUILD + AUTO-RUN FIRST TIME)
+// 1️⃣ UPLOAD PROJECT
 // =====================================================
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
@@ -39,12 +40,9 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       sourceType = "zip";
       sourcePathOrUrl = req.file.path;
     } else {
-      return res
-        .status(400)
-        .json({ message: "Upload ZIP or provide GitHub URL" });
+      return res.status(400).json({ message: "Upload ZIP or GitHub URL" });
     }
 
-    // Create project entry
     const project = await Project.create({
       studentName,
       regNumber,
@@ -63,45 +61,44 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       createdDate: new Date()
     });
 
-    // Queue build job
-    await buildQueue.add({
-      projectId: project._id,
-      sourceType,
-      sourcePathOrUrl
-    });
+    await buildQueue.add({ projectId: project._id, sourceType, sourcePathOrUrl });
 
     res.status(200).json({
-      message: "Build & deploy queued successfully",
+      message: "Build queued successfully",
       projectId: project._id
     });
+
   } catch (err) {
     console.error("Upload error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
+
 // =====================================================
-// 2️⃣ GET ALL PROJECTS (Professor Dashboard)
+// 2️⃣ GET ALL PROJECTS  (IMPORTANT: COMES BEFORE /:id)
 // =====================================================
-router.get("/", async (req, res) => {
+router.get("/all", async (req, res) => {
   const projects = await Project.find().sort({ createdDate: -1 });
   res.json(projects);
 });
 
+
 // =====================================================
-// 3️⃣ GET PROJECT BY ID (Project Detail Page)
+// 3️⃣ GET PROJECT BY ID
 // =====================================================
-router.get("/:id", async (req, res) => {
+router.get("/details/:id", async (req, res) => {
   const project = await Project.findById(req.params.id);
   if (!project) return res.status(404).json({ message: "Project not found" });
 
   res.json(project);
 });
 
+
 // =====================================================
-// 4️⃣ PROFESSOR: RUN PROJECT (Only if stopped)
+// 4️⃣ RUN PROJECT
 // =====================================================
-router.post("/:id/run", async (req, res) => {
+router.post("/run/:id", async (req, res) => {
   try {
     const url = await runProject(req.params.id);
     res.json({ message: "Project started", url });
@@ -110,10 +107,11 @@ router.post("/:id/run", async (req, res) => {
   }
 });
 
+
 // =====================================================
-// 5️⃣ PROFESSOR: STOP PROJECT (Only if running)
+// 5️⃣ STOP PROJECT
 // =====================================================
-router.post("/:id/stop", async (req, res) => {
+router.post("/stop/:id", async (req, res) => {
   try {
     await stopProject(req.params.id);
     res.json({ message: "Project stopped" });
@@ -122,15 +120,17 @@ router.post("/:id/stop", async (req, res) => {
   }
 });
 
+
 // =====================================================
-// 6️⃣ DELETE PROJECT (Optional)
+// 6️⃣ DELETE PROJECT
 // =====================================================
-router.delete("/:id", async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
   const project = await Project.findById(req.params.id);
   if (!project) return res.status(404).json({ message: "Project not found" });
 
   await project.deleteOne();
   res.json({ message: "Project deleted successfully" });
 });
+
 
 module.exports = router;
