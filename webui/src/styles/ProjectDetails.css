@@ -1,270 +1,136 @@
 .appContainer1 {
     font-family: 'Arial', sans-serif;
     color: #333333;
-    display: flex;
-    flex-direction: column;
+    width: 100%;
 }
 
+/* Top dark blue box */
 .box {
     background-color: #021E30;
-    position: absolute;
-    margin-top: 120px;
-    height: 40%;
     width: 100%;
+    height: 250px;
+    position: absolute;
+    z-index: -1;
 }
 
+/* Project title */
 .project_title {
-    margin-top: 15px;
-    margin-left: 15px;
+    margin-top: 25px;
+    margin-left: 95px;
     font-weight: bold;
-    font-size: 30px;
-}
-
-.carousel {
-    position: relative;
-    /* Changed to relative to avoid absolute positioning issues */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 90%;
-    height: 400px;
-    margin: auto;
-    /* Added margin to center the carousel horizontally */
-    overflow: hidden;
-    margin-top: 10px
-}
-
-.slide {
-    border-radius: 0.5rem;
-    box-shadow: 0px 0px 7px #666;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    /* Ensure the slide is positioned at the top */
-    left: 0;
-    /* Ensure the slide is positioned at the left */
-    position: absolute;
-    /* Stack slides on top of each other */
-    transition: opacity 0.5s ease;
-    /* Smooth transition for visibility */
-    opacity: 1;
-    /* Ensure the active slide is fully visible */
-}
-
-.slide-hidden {
-    opacity: 0;
-    pointer-events: none;
-    /* Prevent interaction with hidden slides */
-}
-
-.arrow {
-    position: absolute;
-    filter: drop-shadow(0px 0px 5px #555);
-    width: 2rem;
-    height: 2rem;
+    font-size: 35px;
     color: white;
-    z-index: 1;
-    /* Added z-index to ensure arrows are above slides */
 }
 
-.arrow:hover {
-    cursor: pointer;
-}
-
-.arrow-left {
-    left: 1rem;
-}
-
-.arrow-right {
-    right: 1rem;
-}
-
-.indicators {
-    display: flex;
-    position: absolute;
-    bottom: 1rem;
-    justify-content: center;
-    /* Added to center indicators */
-    width: 100%;
-    /* Added to ensure indicators are centered */
-}
-
-.indicator {
-    background-color: white;
-    height: 0.5rem;
-    width: 0.5rem;
-    border-radius: 100%;
-    border: none;
-    outline: none;
-    box-shadow: 0px 0px 5px #555;
-    margin: 0 0.2rem;
-    cursor: pointer;
-}
-
-.indicator-inactive {
-    background-color: grey;
-}
-
-.button {
-    --tw-bg-opacity: 1;
+/* Book icon */
+.icon-box {
+    display: inline-block;
+    padding: 10px;
     background-color: #DF4807;
-    --tw-text-opacity: 1;
-    color: rgb(255 255 255/var(--tw-text-opacity));
-    border: 0;
-    cursor: pointer;
-    border: 0;
-    --tw-border-opacity: 1;
-    border-color: rgb(0 0 0/var(--tw-border-opacity));
-    font-weight: 500;
-    border-radius: 0.5rem;
-    font-size: .875rem;
-    line-height: 1.25rem;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-    padding-top: 0.625rem;
-    padding-bottom: 0.625rem;
-    text-align: center;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.5rem;
-    margin-top: 1rem;
-    margin-right: 10px;
-    margin-left: 1269px;
+    border-radius: 12px;
+    margin-left: 35px;
+    margin-top: 25px;
 }
 
+/* Back arrow */
 .left-arrow {
     color: #DF4807;
     margin-top: 15px;
     margin-left: 35px;
+}
+.left-arrow:hover {
+    transform: scale(1.07);
+    cursor: pointer;
+}
 
-}
-.left-arrow :hover {
-transform: scale(1.05);
-cursor: pointer;
-}
 .previous_screen {
     font-weight: bold;
     color: #DF4807;
     margin-left: 10px;
-    font-size: 22px;
+    font-size: 23px;
     letter-spacing: 0.5em;
-}
-
-.previous_screen {
-    transform: scale(1.05);
     cursor: pointer;
 }
 
-.icon-box {
-    display: inline-block;
-    padding: 8px;
-    /* Adjust padding as needed */
-    border: 2px solid #DF4807;
-    /* Adjust border size and color as needed */
-    border-radius: 15px 5px 5px 5px;
-    /* Individual border radius values for each corner */
-    background-color: #DF4807;
-    /* Optional: add background color */
-    margin-top: 18px;
-    margin-left: 32px;
+/* Carousel */
+.carousel {
+    width: 80%;
+    margin: 60px auto 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.carousel-image {
+    height: 380px;
+    object-fit: cover;
 }
 
+/* Learn + Run row */
 .container {
-    margin-top: 20px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    /* Align items vertically centered */
+    width: 85%;
+    margin: 40px auto 0 auto;
 }
 
 .description {
-    word-spacing: 0.5em;
-    /* Adjust the value for word spacing */
-    letter-spacing: 0.1em;
-    /* Adjust the value for letter spacing */
-    margin-right: 20px;
-    /* Add some space between the text and the button */
     color: #DF4807;
     font-weight: bold;
-    font-size: 20px;
-    margin-left: 35px
+    font-size: 24px;
+    letter-spacing: 0.1em;
 }
 
+/* Run, Running, Stop buttons */
 .run_btn {
     background-color: #DF4807;
-    /* Background color */
-    color: #fff;
-    /* Text color */
+    color: white;
     border: none;
-    /* Remove default border */
-    padding: 10px 20px;
-    /* Padding inside the button */
-    border-radius: 5px;
-    /* Rounded corners */
-    font-size: 16px;
-    /* Font size */
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 15px;
     cursor: pointer;
-    /* Pointer cursor on hover */
-    transition: background-color 0.3s ease;
-    /* Smooth transition for hover effect */
-    margin-left: 780px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    transition: 0.25s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    margin-left: 10px;
 }
-
 .run_btn:hover {
     background-color: #c43f06;
-    /* Darker background on hover */
+}
+.stop_btn {
+    background-color: #b30000 !important;
+    margin-left: 10px;
 }
 
-.run_btn:focus {
-    outline: none;
-    /* Remove focus outline */
-    box-shadow: 0 0 0 3px rgba(223, 72, 7, 0.5);
-    /* Add a focus shadow */
-}
-
+/* Description */
 .desc_container {
-    margin-left: 35px;
-    max-width: 1360px;
+    width: 85%;
+    margin: 25px auto 0 auto;
     text-align: justify;
+    font-size: 18px;
 }
 
+/* Technology section */
 .tech_container {
     background-color: #D9D9D9;
-    display: flex;
-    flex-direction: column;
     margin-top: 60px;
+    padding: 30px 0;
 }
 
 .tech_title {
     font-weight: bold;
-    font-size: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.tech_icon {
-    padding: 10px;
-    margin-bottom: 20px;
-    margin-left: 35px;
-    width: 280px;
-    height: auto;
-    margin-top:-50px
+    font-size: 32px;
+    text-align: center;
 }
 
 .tech_details {
     display: flex;
-    flex-direction: row;
-    gap: 20px;
-    width: 349px;
-    margin-left: 200px;
+    gap: 40px;
+    justify-content: center;
+    margin-top: 20px;
 }
 
 .tech_item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    width:100%
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
 }

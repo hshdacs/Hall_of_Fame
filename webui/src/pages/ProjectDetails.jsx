@@ -1,146 +1,125 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Container, Typography, Dialog, DialogContent, DialogTitle, IconButton, Box } from '@mui/material';
-import { CheckCircleOutline, ErrorOutline, Close } from '@mui/icons-material';
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-import { Carousel } from 'react-responsive-carousel';
-import Header from '../components/Header';
-import '../styles/ProjectDetails.css';
-import { BsArrowLeftCircleFill, BsArrowRightCircleFill } from "react-icons/bs";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faBook } from '@fortawesome/free-solid-svg-icons';
-import reactIcon from '../assets/react.png';
-import nodeIcon from '../assets/node.png';
-import mongoIcon from '../assets/mongo.png';
-import ProjectDescription from '../components/ProjectDescription';
-import axios from 'axios';
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import {
+    Container,
+    Typography,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    Box
+} from "@mui/material";
+import { CheckCircleOutline, ErrorOutline, Close } from "@mui/icons-material";
+import { Carousel } from "react-responsive-carousel";
+
+import Header from "../components/Header";
+import "../styles/ProjectDetails.css";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faBook } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
+
+const MAX_LENGTH = 500;
 
 const ProjectDetails = () => {
-    const [slide, setSlide] = useState(0);
     const { projectId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+
     const [project, setProject] = useState(location.state?.project);
-    const [isRunning, setIsRunning] = useState(false); // Track if the project is running
-    const [timeoutId, setTimeoutId] = useState(null);
-    const projectTabRef = useRef(null); // Ref to store the opened project tab
+    const [isRunning, setIsRunning] = useState(false);
+    const [expanded, setExpanded] = useState(false);
+
+    const projectTabRef = useRef(null);
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [modalMessage, setModalMessage] = useState('');
+    const [modalMessage, setModalMessage] = useState("");
     const [isSuccess, setIsSuccess] = useState(false);
-useEffect(() => {
-  const fetchProject = async () => {
-    try {
-      const response = await axios.get(`http://localhost:8020/api/project/details/${projectId}`);
-      setProject(response.data);
-      setIsRunning(response.data.status === "running");
-    } catch (error) {
-      console.error("Error fetching project data", error);
-    }
-  };
 
-  if (!project) fetchProject();
-}, [projectId, project]);
+    useEffect(() => {
+        if (!project) {
+            axios.get(`http://localhost:8020/api/project/details/${projectId}`)
+                .then((res) => {
+                    setProject(res.data);
+                    setIsRunning(res.data.status === "running");
+                })
+                .catch(console.error);
+        }
+    }, [project, projectId]);
 
-    const showModal = (message, success) => {
-        setModalMessage(message);
+    const showModal = (msg, success) => {
+        setModalMessage(msg);
         setIsSuccess(success);
         setModalOpen(true);
     };
 
-    if (!project) {
-        return (
-            <Container>
-                <Typography variant="h4">Project Not Found</Typography>
-            </Container>
-        );
-    }
+    const closeModal = () => setModalOpen(false);
 
-    const nextSlide = () => {
-        setSlide((prevSlide) => (prevSlide + 1) % project.images.length);
+    const startProject = async () => {
+        try {
+            const res = await axios.post(`http://localhost:8020/api/project/run/${projectId}`);
+            if (res.data.url) {
+                const tab = window.open(res.data.url, "_blank");
+                projectTabRef.current = tab;
+            }
+            setIsRunning(true);
+            showModal("Project started successfully!", true);
+        } catch {
+            showModal("Failed to start project", false);
+        }
     };
 
-    const prevSlide = () => {
-        setSlide((prevSlide) => (prevSlide - 1 + project.images.length) % project.images.length);
+    const stopProject = async () => {
+        try {
+            await axios.post(`http://localhost:8020/api/project/stop/${projectId}`);
+            if (projectTabRef.current) projectTabRef.current.close();
+            setIsRunning(false);
+            showModal("Project stopped successfully!", true);
+        } catch {
+            showModal("Failed to stop project", false);
+        }
     };
 
-    const setCurrentSlide = (index) => {
-        setSlide(index);
-    };
+    if (!project) return <Container><Typography>Project Not Found</Typography></Container>;
 
-    const handleBackToDashboard = () => {
-        navigate('/'); // Assuming '/' is the route for the dashboard
-    };
-
-const handleRunProject = async (projectId) => {
-  try {
-    const response = await fetch(`http://localhost:8020/api/project/run/${projectId}`, {
-      method: "POST",
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      const projectTab = window.open(data.url, "_blank");
-      showModal("Project started.", true);
-      setIsRunning(true);
-      projectTabRef.current = projectTab;
-    } else {
-      showModal(data.error, false);
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    showModal("Failed to start project", false);
-  }
-};
-
-    const stopProject = async (projectId) => {
-  try {
-    const response = await fetch(`http://localhost:8020/api/project/stop/${projectId}`, {
-      method: "POST",
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      showModal("Project stopped successfully.", true);
-      setIsRunning(false);
-    } else {
-      showModal(data.error, false);
-    }
-
-  } catch (error) {
-    console.error("Error stopping project:", error);
-    showModal("Error stopping the project", false);
-  }
-};
-
-const handleCloseModal = () => {
-    setModalOpen(false);
-};
+    const longDesc = project.longDescription || "";
+    const shortDesc = longDesc.substring(0, MAX_LENGTH);
+    const needsMore = longDesc.length > MAX_LENGTH;
 
     return (
-        <div>
+        <div className="appContainer1">
             <Header />
-            <FontAwesomeIcon className='left-arrow' icon={faArrowLeft} size="2xl" onClick={handleBackToDashboard} />
-            <span className='previous_screen' onClick={handleBackToDashboard}>DASHBOARD</span>
-            <div className='box'></div>
+
+            {/* BACK */}
+            <FontAwesomeIcon
+                className="left-arrow"
+                icon={faArrowLeft}
+                size="2xl"
+                onClick={() => navigate("/")}
+            />
+            <span className="previous_screen" onClick={() => navigate("/")}>
+                DASHBOARD
+            </span>
+
+            <div className="box"></div>
+
+            {/* TITLE */}
             <div>
                 <div className="icon-box">
-                    <FontAwesomeIcon className='icon-box"' icon={faBook} size="2xl" style={{ color: 'white' }} />
+                    <FontAwesomeIcon icon={faBook} size="2xl" color="white" />
                 </div>
-                <span className='project_title'>{project.projectTitle}</span>
+                <span className="project_title">{project.projectTitle}</span>
             </div>
-            <Dialog open={modalOpen} onClose={handleCloseModal}>
+
+            {/* MODAL */}
+            <Dialog open={modalOpen} onClose={closeModal}>
                 <DialogTitle>
-                    <Box display="flex" alignItems="center">
-                        {isSuccess ? (
-                            <CheckCircleOutline color="success" sx={{ mr: 1 }} />
-                        ) : (
-                            <ErrorOutline color="error" sx={{ mr: 1 }} />
-                        )}
-                        {isSuccess ? 'Success' : 'Error'}
-                        <IconButton onClick={handleCloseModal} sx={{ ml: 'auto' }}>
+                    <Box display="flex">
+                        {isSuccess ? <CheckCircleOutline color="success" /> : <ErrorOutline color="error" />}
+                        <Typography sx={{ marginLeft: 1 }}>
+                            {isSuccess ? "Success" : "Error"}
+                        </Typography>
+                        <IconButton sx={{ marginLeft: "auto" }} onClick={closeModal}>
                             <Close />
                         </IconButton>
                     </Box>
@@ -149,62 +128,58 @@ const handleCloseModal = () => {
                     <Typography>{modalMessage}</Typography>
                 </DialogContent>
             </Dialog>
+
+            {/* CAROUSEL */}
             <div className="carousel">
-                <BsArrowLeftCircleFill className="arrow arrow-left" onClick={prevSlide} />
-                <Carousel selectedItem={slide} showArrows={false} showIndicators={false} showStatus={false} showThumbs={false}>
-                    {project.images.map((image, index) => (
-                        <div key={index} className={`slide ${slide === index ? '' : 'slide-hidden'}`}>
-                            <img src={image} alt={`Project image ${index + 1}`} className="carousel-image" />
+                <Carousel showThumbs={false} showStatus={false} infiniteLoop={true}>
+                    {project.images.map((img, idx) => (
+                        <div key={idx}>
+                            <img src={img} className="carousel-image" alt="project" />
                         </div>
                     ))}
                 </Carousel>
-                <BsArrowRightCircleFill className="arrow arrow-right" onClick={nextSlide} />
-                <div className="indicators">
-                    {project.images.map((_, index) => (
-                        <button
-                            key={index}
-                            className={`indicator ${slide === index ? 'indicator-active' : 'indicator-inactive'}`}
-                            onClick={() => setCurrentSlide(index)}
-                        />
-                    ))}
-                </div>
             </div>
+
+            {/* LEARN + BUTTONS */}
             <div className="container">
-                <p className="description">YOU WILL LEARN ABOUT PROJECT</p>
-                <span>
-                    <button 
-                        className="run_btn" 
-                        onClick={() => handleRunProject(projectId)} 
-                        disabled={isRunning} // Disable the button if the project is running
-                    >
-                        {isRunning ? "Running" : "Run Project"} {/* Change button label */}
-                    </button>
-                </span>
+                <p className="description"> ABOUT PROJECT</p>
+
+                {!isRunning && (
+                    <button className="run_btn" onClick={startProject}>Start Project</button>
+                )}
+
+                {isRunning && (
+                    <>
+                        <button className="run_btn" disabled>Running</button>
+                        <button className="run_btn stop_btn" onClick={stopProject}>Stop</button>
+                    </>
+                )}
             </div>
+
+            {/* DESCRIPTION */}
             <div className="desc_container">
-                <ProjectDescription description={project.longDescription} />
+                {needsMore ? (
+                    <>
+                        {expanded ? longDesc : shortDesc + "… "}
+                        {!expanded && (
+                            <span
+                                style={{ color: "#DF4807", fontWeight: "bold", cursor: "pointer" }}
+                                onClick={() => setExpanded(true)}
+                            >
+                                More
+                            </span>
+                        )}
+                    </>
+                ) : longDesc}
             </div>
+
+            {/* TECH */}
             <div className="tech_container">
-                <p className='tech_title'>Technology Used</p>
+                <p className="tech_title">Technology Used</p>
                 <div className="tech_details">
-                    {project.technologiesUsed.includes("React") && (
-                        <div className="tech_item">
-                            <img src={reactIcon} alt="ReactJS Icon" className="tech_sub_icon" />
-                            <Typography variant="h6" sx={{ 'fontWeight': 'bold' }}>ReactJs</Typography>
-                        </div>
-                    )}
-                    {project.technologiesUsed.includes("Node.js") && (
-                        <div className="tech_item">
-                            <img src={nodeIcon} alt="NodeJS Icon" className="tech_sub_icon" />
-                            <Typography variant="h6" sx={{ 'fontWeight': 'bold' }}>NodeJS</Typography>
-                        </div>
-                    )}
-                    {project.technologiesUsed.includes("MongoDB") && (
-                        <div className="tech_item">
-                            <img src={mongoIcon} alt="MongoDB Icon" className="tech_sub_icon" />
-                            <Typography variant="h6" sx={{ 'fontWeight': 'bold' }}>MongoDB</Typography>
-                        </div>
-                    )}
+                    {project.technologiesUsed.map((tech, index) => (
+                        <div className="tech_item" key={index}>{tech}</div>
+                    ))}
                 </div>
             </div>
         </div>
