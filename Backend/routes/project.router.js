@@ -19,12 +19,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     const {
       studentName,
       regNumber,
-      batch,
-      course,
-      school,
-      studyProgramme,
-      yearOfBatch,
-      faculty,
       projectTitle,
       description,
       githubUrl,
@@ -46,12 +40,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     const project = await Project.create({
       studentName,
       regNumber,
-      batch,
-      course,
-      school,
-      studyProgramme,
-      yearOfBatch,
-      faculty,
       projectTitle,
       longDescription: description,
       technologiesUsed: technologiesUsed?.split(",") ?? [],
@@ -61,7 +49,16 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       createdDate: new Date()
     });
 
-    await buildQueue.add({ projectId: project._id, sourceType, sourcePathOrUrl });
+    await buildQueue.add(
+      { projectId: project._id, sourceType, sourcePathOrUrl },
+      {
+        attempts: 3,
+        backoff: 5000,
+        removeOnComplete: true,
+        removeOnFail: false
+      }
+    );
+
 
     res.status(200).json({
       message: "Build queued successfully",
@@ -73,6 +70,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 // =====================================================

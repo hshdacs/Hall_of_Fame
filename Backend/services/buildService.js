@@ -13,11 +13,10 @@ async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
   const git = simpleGit();
   const projectDir = path.join(process.cwd(), "uploads", String(projectId));
 
-  // ensure workspace directory
   fs.mkdirSync(projectDir, { recursive: true });
 
   // ----------------------------------------------------
-  // 1️⃣ FETCH PROJECT SOURCE (GitHub or ZIP)
+  // 1️⃣ FETCH PROJECT SOURCE
   // ----------------------------------------------------
   if (sourceType === "github") {
     await git.clone(sourcePathOrUrl, projectDir);
@@ -26,11 +25,8 @@ async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
       .createReadStream(sourcePathOrUrl)
       .pipe(unzipper.Extract({ path: projectDir }))
       .promise();
-  } else {
-    throw new Error("Invalid source type");
   }
 
-  // load project
   const project = await Project.findById(projectId);
   if (!project) throw new Error("Project not found");
 
@@ -39,36 +35,63 @@ async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
   project.logs.deploy = "";
   await project.save();
 
-  // paths
+  // ----------------------------------------------------
+  // 2️⃣ DETECT DEPLOYMENT TYPE
+  // ----------------------------------------------------
   const dockerfilePath = path.join(projectDir, "Dockerfile");
+  const composePath = path.join(projectDir, "docker-compose.yml");
+
+  const hasDockerfile = fs.existsSync(dockerfilePath);
+  const hasCompose = fs.existsSync(composePath);
+
+  if (!hasDockerfile && !hasCompose) {
+    project.status = "build_failed";
+    project.logs.build = "❌ No Dockerfile or docker-compose.yml found.";
+    await project.save();
+    return { success: false, error: "No Dockerfile or docker-compose.yml found" };
+  }
 
   try {
     // ----------------------------------------------------
-    // 2️⃣ BUILD DOCKER IMAGE
+    // 3️⃣ HANDLE DOCKER-COMPOSE
     // ----------------------------------------------------
-    if (!fs.existsSync(dockerfilePath)) {
-      project.status = "build_failed";
-      project.logs.build = "No Dockerfile found in project.";
+    if (hasCompose) {
+      project.logs.build += "📦 docker-compose.yml detected — building multi-service app...\n";
+
+      // build all services
+      const buildOut = execSync(`docker compose -f docker-compose.yml build`, {
+        cwd: projectDir,
+      });
+      project.logs.build += buildOut.toString();
+
+      // start all services
+      const upOut = execSync(`docker compose -f docker-compose.yml up -d`, {
+        cwd: projectDir,
+      });
+      project.logs.deploy += upOut.toString();
+
+      project.status = "running";
+      project.url = "docker-compose"; // optional placeholder
       await project.save();
-      return { success: false, error: "No Dockerfile found" };
+
+      return { success: true, url: "docker-compose" };
     }
 
-    project.logs.build += "Dockerfile found. Building image...\n";
-
-    const imageTag = `project_${projectId}`;
-    const containerName = `container_${projectId}`;
-
-    const buildOut = execSync(`docker build -t ${imageTag} .`, {
-      cwd: projectDir,
-    });
-
-    project.logs.build += buildOut.toString();
-
     // ----------------------------------------------------
-    // 3️⃣ START CONTAINER AUTOMATICALLY ON FIRST BUILD
+    // 4️⃣ HANDLE SIMPLE DOCKERFILE PROJECTS
     // ----------------------------------------------------
-    if (project.status !== "running") {
-      const internalPort = 80; // default — can be improved later
+    if (hasDockerfile) {
+      project.logs.build += "🐳 Dockerfile found — building image...\n";
+
+      const imageTag = `project_${projectId}`;
+      const containerName = `container_${projectId}`;
+
+      const buildOut = execSync(`docker build -t ${imageTag} .`, {
+        cwd: projectDir,
+      });
+      project.logs.build += buildOut.toString();
+
+      const internalPort = 80;
       const hostPort = await getPort({
         port: getPort.makeRange(8000, 9999),
       });
@@ -80,21 +103,20 @@ async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
 
       project.logs.deploy += runOut.toString();
 
-      // save metadata
       project.imageTag = imageTag;
       project.containerName = containerName;
       project.internalPort = internalPort;
       project.hostPort = hostPort;
       project.url = `http://localhost:${hostPort}`;
       project.status = "running";
+      await project.save();
+
+      return { success: true, url: project.url };
     }
 
-    await project.save();
-
-    return { success: true, url: project.url, error: null };
   } catch (err) {
     project.status = "build_failed";
-    project.logs.build += `\nERROR: ${err.message}\n`;
+    project.logs.build += `❌ ERROR: ${err.message}\n`;
     await project.save();
 
     return { success: false, error: err.message };
