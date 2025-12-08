@@ -82,6 +82,7 @@ router.get("/all", async (req, res) => {
 });
 
 
+
 // =====================================================
 // 3️⃣ GET PROJECT BY ID
 // =====================================================
@@ -90,6 +91,26 @@ router.get("/details/:id", async (req, res) => {
   if (!project) return res.status(404).json({ message: "Project not found" });
 
   res.json(project);
+});
+
+// =====================================================
+// 3️⃣b GET RUNNING SERVICES / CONTAINERS (NEW)
+// =====================================================
+const { getProjectServices } = require("../services/projectStatus");
+
+router.get("/status/:id", async (req, res) => {
+  try {
+    const projectId = req.params.id;
+    const services = getProjectServices(projectId);
+
+    res.json({
+      projectId,
+      services,
+      count: services.length
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 
