@@ -28,6 +28,10 @@ const projectSchema = new mongoose.Schema({
   
   url: { type: String },
 
+   // 🧩 docker-compose specific fields (MISSING EARLIER)
+  frontendService: { type: String },   // NEW → required by runProject.js
+  frontendPort: { type: Number },     // NEW → required by runProject.js
+
   status: {
     type: String,
     enum: [
