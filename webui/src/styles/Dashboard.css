@@ -1,32 +1,88 @@
+.page-content {
+  flex-grow: 1;
+}
 
-  .page-content {
-    flex-grow: 1;
-    /* padding: 24px; */
-    
-  }
-  
-  .header-text {
-    margin-left: 25px;
-    color: rgba(0, 0, 0, 0.699999988079071);
-  }
+.header-text {
+  margin-left: 25px;
+  color: rgba(0, 0, 0, 0.7);
+}
 
-  .appContainer {
-    box-shadow: 6px 6px 6px 6px #979797;
-    margin-bottom: 18px;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    width:100%;
-    border-radius: 15px;
-  }
+.appContainer {
+  box-shadow: 6px 6px 6px 6px #979797;
+  margin-bottom: 18px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 15px;
+  padding-bottom: 20px;
+}
 
-  .filter {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
+/* ----------------------------
+   🔹 NEW — Dashboard Top Bar
+----------------------------- */
+.dashboard-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+}
 
- 
+/* Left side → Search */
+.left-side {
+  flex: 1;
+}
 
-  
+/* Right side → Filter + Upload */
+.right-side {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ----------------------------
+   🔹 Upload Button Style
+----------------------------- */
+.upload-btn {
+  background-color: #0a2a43 !important;
+  color: white !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  padding: 8px 22px !important;
+  border-radius: 10px !important;
+  height: 45px !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+.upload-btn:hover {
+  background-color: #062f52 !important;
+}
+
+/* ----------------------------
+   🔹 Upload Modal Styles
+----------------------------- */
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.upload-input,
+.upload-textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+.upload-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.MuiDialog-paper {
+  border-radius: 16px !important;
+  padding-bottom: 20px;
+}

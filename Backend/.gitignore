@@ -1,0 +1,24 @@
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Environment files
+.env
+*.env
+config/*.env
+
+# Uploads and build workspaces
+uploads/
+workspace/
+
+# Logs
+logs/
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor files
+.vscode/
+.idea/

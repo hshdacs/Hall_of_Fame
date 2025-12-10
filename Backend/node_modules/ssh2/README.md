@@ -952,7 +952,7 @@ You can find more examples in the `examples` directory of this repository.
 
     * **hostHash** - _string_ - Any valid hash algorithm supported by node. The host's key is hashed using this algorithm and passed to the **hostVerifier** function as a hex string. **Default:** (none)
 
-    * **hostVerifier** - _function_ - Function with parameters `(hashedKey[, callback])` where `hashedKey` is a string hex hash of the host's key for verification purposes. Return `true` to continue with the handshake or `false` to reject and disconnect, or call `callback()` with `true` or `false` if you need to perform asynchronous verification. **Default:** (auto-accept if `hostVerifier` is not set)
+    * **hostVerifier** - _function_ - Function with parameters `(key[, callback])` for verifying host keys, where `key` is either a hex _string_ of the hash of the key if `hostHash` was set, otherwise it is the raw host key in _Buffer_ form. Use `utils.parseKey()` to get the host key type. Return `true` to continue with the handshake or `false` to reject and disconnect, or call `callback()` with `true` or `false` if you need to perform asynchronous verification. **Default:** (auto-accept if `hostVerifier` is not set)
 
     * **keepaliveCountMax** - _integer_ - How many consecutive, unanswered SSH-level keepalive packets that can be sent to the server before disconnection (similar to OpenSSH's ServerAliveCountMax config option). **Default:** `3`
 
@@ -1028,7 +1028,7 @@ You can find more examples in the `examples` directory of this repository.
 
 * **setNoDelay**([< _boolean_ >noDelay]) - _Client_ - Calls [`setNoDelay()`](https://nodejs.org/docs/latest/api/net.html#socketsetnodelaynodelay) on the underlying socket. Disabling Nagle's algorithm improves latency at the expense of lower throughput.
 
-* **sftp**(< _function_ >callback) - _(void)_ - Starts an SFTP session. `callback` has 2 parameters: < _Error_ >err, < _SFTP_ >sftp. For methods available on `sftp`, see the [`SFTP` client documentation](https://github.com/mscdex/ssh2/blob/master/SFTP.md).
+* **sftp**([< _object_ >env, ]< _function_ >callback) - _(void)_ - Starts an SFTP session. `env` is an environment to use when executing `sftp` methods. `callback` has 2 parameters: < _Error_ >err, < _SFTP_ >sftp. For methods available on `sftp`, see the [`SFTP` client documentation](https://github.com/mscdex/ssh2/blob/master/SFTP.md).
 
 * **shell**([[< _mixed_ >window,] < _object_ >options]< _function_ >callback) - _(void)_ - Starts an interactive shell session on the server, with an optional `window` object containing pseudo-tty settings (see 'Pseudo-TTY settings'). If `window === false`, then no pseudo-tty is allocated. `options` supports the `x11` and `env` options as described in `exec()`. `callback` has 2 parameters: < _Error_ >err, < _Channel_ >stream.
 
@@ -1056,16 +1056,18 @@ You can find more examples in the `examples` directory of this repository.
 
         * **comments** - _string_ - Any text that comes after the software name/version.
 
-    Example: the identification string `SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2` would be parsed as:
+        Example: the identification string `SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2` would be parsed as:
 
-```js
-        { identRaw: 'SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2',
+        ```js
+        {
+          identRaw: 'SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2',
           version: {
             protocol: '2.0',
             software: 'OpenSSH_6.6.1p1'
           },
-          comments: 'Ubuntu-2ubuntu2' }
-```
+          comments: 'Ubuntu-2ubuntu2'
+        }
+        ```
 
     * **ip** - _string_ - The `remoteAddress` of the connection.
 

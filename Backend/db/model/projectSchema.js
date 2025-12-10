@@ -1,32 +1,69 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const projectSchema = new mongoose.Schema({
-    projectTitle: {
-        type: String,
-        required: true
+  // 🧑‍🎓 Student Information
+  studentName: { type: String, required: true },
+  regNumber: { type: String, required: true },
+  batch: { type: String },
+  course: { type: String },
+
+  // 🎓 SRH Metadata
+  school: { type: String },
+  studyProgramme: { type: String },
+  yearOfBatch: { type: Number },
+  faculty: { type: String },
+
+  // 📁 Project Metadata
+  projectTitle: { type: String, required: true },
+  longDescription: { type: String },
+  githubUrl: { type: String },
+  sourceType: { type: String }, // github | zip
+  sourcePathOrUrl: { type: String },
+
+  // 🐳 Deployment & Build Info
+  imageTag: { type: String },          // NEW
+  containerName: { type: String },     // NEW
+  hostPort: { type: Number },          // NEW
+  internalPort: { type: Number },      // NEW (default 80)
+  
+  url: { type: String },
+
+  status: {
+    type: String,
+    enum: [
+      "queued",
+      "building",
+      "ready",
+      "running",
+      "stopped",
+      "failed",
+      "build_failed"
+    ],
+    default: "queued",
+  },
+
+  // 🧾 Logs
+  logs: {
+    build: { type: String, default: "" },
+    deploy: { type: String, default: "" },
+  },
+
+  // 🕒 Audit
+  createdDate: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+
+  // 🧠 Image carousel for frontend
+  images: [{ type: String }],
+  technologiesUsed: [{ type: String }],
+
+  // 🧩 Build History
+  buildHistory: [
+    {
+      timestamp: { type: Date, default: Date.now },
+      status: { type: String },
+      message: { type: String }
     },
-    createdDate: {
-        type: Date,
-        default: Date.now
-    },
-    longDescription: {
-        type: String,
-        required: true
-    },
-    images: {
-        type: [String],
-        required: true
-    },
-    technologiesUsed: {
-        type: [String],
-        required: true
-    },
-    githubUrl: String,
-    dockerImageUrl: String,
-    school: String,
-    studyProgramme: String,
-    yearOfBatch: Number,
-    faculty: String
+  ],
 });
 
-module.exports = mongoose.model('Project', projectSchema);
+module.exports = mongoose.model("Project", projectSchema);
