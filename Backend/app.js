@@ -3,6 +3,7 @@ const cors = require('cors');
 
 const routes = require('./routes/routes');
 const projectRoutes = require('./routes/project.router');
+const authRoutes = require('./routes/auth.routes');
 
 // Bull Board imports
 const { ExpressAdapter } = require('@bull-board/express');
@@ -12,20 +13,33 @@ const { BullAdapter } = require('@bull-board/api/bullAdapter');
 // Queue
 const buildQueue = require('./queue/buildQueue');
 
+// Swagger imports
+const { swaggerUi, swaggerSpec } = require("./config/swagger.js");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Health
-app.get('/', (req, res) => res.send('API running successfully 🚀'));
-
-// API ROUTES
-app.use('/', routes);
-app.use('/api/project', projectRoutes);
+// ===============================
+// Swagger Documentation
+// ===============================
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ===============================
-// 🚀 BULL BOARD SETUP
+// Health Check
+// ===============================
+app.get('/', (req, res) => res.send('API running successfully 🚀'));
+
+// ===============================
+// API ROUTES
+// ===============================
+app.use('/api/auth', authRoutes);
+app.use('/api/project', projectRoutes);
+app.use('/', routes);
+
+// ===============================
+// Bull Board (Queue Monitoring)
 // ===============================
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
@@ -37,16 +51,16 @@ createBullBoard({
 
 app.use('/admin/queues', serverAdapter.getRouter());
 
-// =====================================================
-// 🛑 SPA FALLBACK: Only match NON-API paths
-// =====================================================
-app.get(/^\/(?!api).*/, (req, res) => {
+// ===============================
+// SPA Fallback (React dev server)
+// ===============================
+app.get(/^\/(?!api)(?!admin\/queues).*/, (req, res) => {
   res.status(200).send("Frontend route handled by React dev server");
 });
 
-// =====================================================
-// ERROR HANDLER (must be last)
-// =====================================================
+// ===============================
+// Global Error Handler
+// ===============================
 app.use((err, req, res, next) => {
   console.error('Unhandled Error:', err.stack);
   res.status(500).json({ message: 'Internal Server Error' });
