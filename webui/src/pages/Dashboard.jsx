@@ -179,15 +179,26 @@ const Dashboard = () => {
   );
 
   const handleUpload = async () => {
+    const githubUrl = document.getElementById("githubUrl").value.trim();
+    const zipFile = document.getElementById("zipFile").files[0];
+
+    if (!githubUrl && !zipFile) {
+      alert("Please provide either a GitHub URL or a ZIP file.");
+      return;
+    }
+
+    if (githubUrl && zipFile) {
+      alert("Please choose only one source: GitHub URL or ZIP file.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("studentName", document.getElementById("studentName").value);
     formData.append("regNumber", document.getElementById("regNumber").value);
+    formData.append("course", document.getElementById("course").value);
     formData.append("projectTitle", document.getElementById("projectTitle").value);
     formData.append("description", document.getElementById("description").value);
     formData.append("technologiesUsed", document.getElementById("technologiesUsed").value);
-
-    const githubUrl = document.getElementById("githubUrl").value;
-    const zipFile = document.getElementById("zipFile").files[0];
 
     if (githubUrl) formData.append("githubUrl", githubUrl);
     if (zipFile) formData.append("file", zipFile);
@@ -225,6 +236,13 @@ const Dashboard = () => {
           <div className="right-side">
             <Filter />
             <Button
+              variant="outlined"
+              className="upload-btn"
+              onClick={() => navigate("/admin/monitoring")}
+            >
+              Quota Monitor
+            </Button>
+            <Button
               variant="contained"
               className="upload-btn"
               onClick={() => setUploadModalOpen(true)}
@@ -251,6 +269,10 @@ const Dashboard = () => {
           <div className="upload-form">
             <input type="text" placeholder="Student Name" className="upload-input" id="studentName" />
             <input type="text" placeholder="Registration Number" className="upload-input" id="regNumber" />
+            <select className="upload-input" id="course" defaultValue="ACS">
+              <option value="ACS">ACS - Applied Computer Science</option>
+              <option value="ADS">ADS - Applied Data Science</option>
+            </select>
             <input type="text" placeholder="Project Title" className="upload-input" id="projectTitle" />
 
             <textarea placeholder="Project Description" className="upload-textarea" id="description" />

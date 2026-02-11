@@ -1,0 +1,159 @@
+.upload-page {
+  min-height: 100vh;
+  background: #f6f8fc;
+}
+
+.upload-layout {
+  max-width: 1240px;
+  margin: 18px auto;
+  padding: 0 20px 24px;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 14px;
+}
+
+.upload-sidebar,
+.upload-main .panel,
+.upload-main {
+  background: #fff;
+  border: 1px solid #e4eaf2;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(16, 40, 71, 0.08);
+}
+
+.upload-sidebar {
+  padding: 16px;
+  height: fit-content;
+}
+
+.upload-sidebar h3 {
+  margin: 0 0 10px;
+}
+
+.step {
+  padding: 10px;
+  border: 1px solid #e4eaf2;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  color: #516a81;
+  font-weight: 600;
+}
+
+.step.done {
+  background: #eef6ff;
+  color: #174893;
+  border-color: #d0e4ff;
+}
+
+.upload-main {
+  padding: 16px;
+}
+
+.upload-main h1 {
+  margin: 0;
+  color: #132844;
+}
+
+.upload-main p {
+  color: #607a90;
+  margin: 6px 0 14px;
+}
+
+.panel {
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.grid-two .full {
+  grid-column: 1 / -1;
+}
+
+.grid-two input,
+.grid-two select,
+.grid-two textarea,
+.panel input[type="file"] {
+  border: 1px solid #dbe4ef;
+  border-radius: 10px;
+  padding: 11px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.grid-two textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.preview-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.preview-grid img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #d9e3ee;
+}
+
+.stack-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stack-pick button {
+  border: 1px solid #d7e2ee;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #fff;
+  color: #183450;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stack-pick button.active {
+  color: #fff;
+  background: #1a4fac;
+  border-color: #1a4fac;
+}
+
+.submit-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submit-row button {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 20px;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(110deg, #df4807, #ff7e41);
+}
+
+@media (max-width: 1020px) {
+  .upload-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

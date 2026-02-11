@@ -1,0 +1,83 @@
+.srh-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #07233b;
+  border-bottom: 3px solid #df4807;
+}
+
+.srh-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+}
+
+.srh-logo {
+  font-weight: 800;
+  background: #df4807;
+  padding: 6px 10px;
+  border-radius: 8px;
+  letter-spacing: 0.8px;
+}
+
+.srh-title {
+  color: #fff;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.srh-sub {
+  color: #b8cad8;
+  font-size: 12px;
+}
+
+.srh-links {
+  display: flex;
+  gap: 18px;
+}
+
+.srh-links a {
+  color: #d7e3ec;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.srh-links a:hover {
+  color: #fff;
+}
+
+.srh-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.srh-actions button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: #df4807;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.role-chip {
+  color: #fff;
+  font-size: 12px;
+  border: 1px solid #31516b;
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+
+@media (max-width: 900px) {
+  .srh-links {
+    display: none;
+  }
+}

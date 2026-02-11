@@ -1,0 +1,160 @@
+.workspace-page {
+  min-height: 100vh;
+  background: #f2f5fa;
+}
+
+.workspace-grid {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px 28px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.workspace-main,
+.workspace-side .side-card {
+  background: #fff;
+  border: 1px solid #e2e9f0;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(14, 37, 63, 0.08);
+}
+
+.workspace-main {
+  padding: 16px;
+}
+
+.workspace-main h1 {
+  margin: 0;
+  color: #102743;
+}
+
+.meta-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  color: #6b7c8f;
+  font-size: 13px;
+}
+
+.status {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.status-running {
+  color: #0f8b4d;
+  background: #dff7e8;
+}
+
+.status-build_failed,
+.status-failed {
+  color: #b02020;
+  background: #ffe3e3;
+}
+
+.status-queued,
+.status-building {
+  color: #935f00;
+  background: #fff0d6;
+}
+
+.workspace-image {
+  max-height: 380px;
+  object-fit: cover;
+}
+
+.no-image {
+  margin-top: 16px;
+  height: 260px;
+  border-radius: 12px;
+  border: 1px dashed #c9d5e2;
+  display: grid;
+  place-items: center;
+  color: #698094;
+}
+
+.workspace-section {
+  margin-top: 18px;
+  border-top: 1px solid #edf1f6;
+  padding-top: 12px;
+}
+
+.workspace-section h3 {
+  margin: 0 0 6px;
+  color: #112843;
+}
+
+.workspace-section p {
+  margin: 0;
+  color: #50667b;
+  line-height: 1.65;
+}
+
+.stack-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stack-list span {
+  background: #edf4ff;
+  color: #18458b;
+  border: 1px solid #d2e3ff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.workspace-side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.workspace-side .side-card {
+  padding: 14px;
+}
+
+.side-card h3 {
+  margin: 0 0 10px;
+}
+
+.side-card button {
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #1b53a6;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.side-card .stop {
+  background: #df4807;
+}
+
+.side-card a {
+  display: inline-block;
+  margin-top: 6px;
+  color: #1652a5;
+  font-weight: 700;
+}
+
+.workspace-error {
+  padding: 30px;
+  text-align: center;
+  color: #26415d;
+}
+
+@media (max-width: 980px) {
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}

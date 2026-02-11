@@ -1,0 +1,87 @@
+.landing-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1a4bbf 0%, #f5f8ff 46%);
+}
+
+.hero {
+  max-width: 920px;
+  margin: 40px auto 20px;
+  text-align: center;
+  color: #fff;
+  padding: 20px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 56px;
+  line-height: 1.06;
+}
+
+.hero span {
+  color: #ff9f70;
+}
+
+.hero p {
+  max-width: 700px;
+  margin: 16px auto 0;
+  color: #d8e5ff;
+  font-size: 17px;
+}
+
+.hero-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hero-actions button {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #df4807;
+  color: #fff;
+}
+
+.hero-actions .outline {
+  background: #fff;
+  color: #16418a;
+}
+
+.feature-grid {
+  max-width: 1120px;
+  margin: 32px auto 0;
+  padding: 0 20px 40px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.feature-grid article {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e7ecf3;
+  box-shadow: 0 16px 30px rgba(24, 53, 91, 0.09);
+  padding: 20px;
+}
+
+.feature-grid h3 {
+  margin: 0;
+  color: #11253e;
+}
+
+.feature-grid p {
+  margin-top: 8px;
+  color: #627587;
+}
+
+@media (max-width: 940px) {
+  .hero h1 {
+    font-size: 42px;
+  }
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
