@@ -28,6 +28,7 @@ const fs = require("fs");
 const path = require("path");
 const Project = require("../db/model/projectSchema");
 const { execSync } = require("child_process");
+const { resolveProjectRoot } = require("./projectSourceResolver");
 
 async function stopProject(projectId) {
   const project = await Project.findById(projectId);
@@ -35,14 +36,14 @@ async function stopProject(projectId) {
   if (!project) throw new Error("Project not found");
   if (project.status !== "running") throw new Error("Project is not running");
 
-  const projectDir = path.join(process.cwd(), "uploads", String(projectId));
-  const composePath = path.join(projectDir, "docker-compose.yml");
+  const uploadRoot = path.join(process.cwd(), "uploads", String(projectId));
+  const { composePath } = resolveProjectRoot(uploadRoot);
 
   try {
     // --------------------------------------------------
     // 1️⃣ If docker-compose exists → bring down ALL services
     // --------------------------------------------------
-    if (fs.existsSync(composePath)) {
+    if (composePath && fs.existsSync(composePath)) {
       console.log("🛑 Stopping docker-compose project...");
       execSync(`docker compose -f "${composePath}" down`, { stdio: "inherit" });
 

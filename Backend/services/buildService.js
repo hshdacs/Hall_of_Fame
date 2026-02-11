@@ -134,27 +134,28 @@ const { execSync } = require("child_process");
 const getPort = require("get-port");
 
 const Project = require("../db/model/projectSchema");
+const { resolveProjectRoot } = require("./projectSourceResolver");
 
 async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
   const git = simpleGit();
-  const projectDir = path.join(process.cwd(), "uploads", String(projectId));
+  const uploadRoot = path.join(process.cwd(), "uploads", String(projectId));
 
   // 🧹 ALWAYS remove previous folder before cloning/unzipping
-  if (fs.existsSync(projectDir)) {
-    fs.rmSync(projectDir, { recursive: true, force: true });
+  if (fs.existsSync(uploadRoot)) {
+    fs.rmSync(uploadRoot, { recursive: true, force: true });
   }
-  fs.mkdirSync(projectDir, { recursive: true });
+  fs.mkdirSync(uploadRoot, { recursive: true });
 
-  console.log(`🚀 Preparing build directory: ${projectDir}`);
+  console.log(`🚀 Preparing build directory: ${uploadRoot}`);
 
   // 1️⃣ FETCH PROJECT SOURCE (GitHub or ZIP)
   try {
     if (sourceType === "github") {
-      await git.clone(sourcePathOrUrl, projectDir);
+      await git.clone(sourcePathOrUrl, uploadRoot);
     } else if (sourceType === "zip") {
       await fs
         .createReadStream(sourcePathOrUrl)
-        .pipe(unzipper.Extract({ path: projectDir }))
+        .pipe(unzipper.Extract({ path: uploadRoot }))
         .promise();
     } else {
       throw new Error("Invalid source type");
@@ -173,12 +174,10 @@ async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
   project.logs.deploy = "";
   await project.save();
 
-  // 2️⃣ Detect Deployment Type
-  const dockerfilePath = path.join(projectDir, "Dockerfile");
-  const composePath = path.join(projectDir, "docker-compose.yml");
-
-  const hasDockerfile = fs.existsSync(dockerfilePath);
-  const hasCompose = fs.existsSync(composePath);
+  // 2️⃣ Detect deployment root and files (supports nested zip folder)
+  const { projectRoot, dockerfilePath, composePath } = resolveProjectRoot(uploadRoot);
+  const hasDockerfile = Boolean(dockerfilePath);
+  const hasCompose = Boolean(composePath);
 
   if (!hasDockerfile && !hasCompose) {
     project.status = "build_failed";
@@ -191,15 +190,15 @@ async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
   try {
     // --- MULTI-SERVICE MODE ---
     if (hasCompose) {
-      project.logs.build += "📦 docker-compose.yml detected — building services...\n";
+      project.logs.build += `📦 Compose file detected at ${composePath} — building services...\n`;
 
-      const buildOut = execSync(`docker compose -f docker-compose.yml build`, {
-        cwd: projectDir,
+      const buildOut = execSync(`docker compose -f "${composePath}" build`, {
+        cwd: projectRoot,
       });
       project.logs.build += buildOut.toString();
 
-      const upOut = execSync(`docker compose -f docker-compose.yml up -d`, {
-        cwd: projectDir,
+      const upOut = execSync(`docker compose -f "${composePath}" up -d`, {
+        cwd: projectRoot,
       });
       project.logs.deploy += upOut.toString();
 
@@ -212,14 +211,17 @@ async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
 
     // --- SINGLE-DOCKERFILE MODE ---
     if (hasDockerfile) {
-      project.logs.build += "🐳 Dockerfile found — building image...\n";
+      project.logs.build += `🐳 Dockerfile found at ${dockerfilePath} — building image...\n`;
 
       const imageTag = `project_${projectId}`;
       const containerName = `container_${projectId}`;
 
-      const buildOut = execSync(`docker build -t ${imageTag} .`, {
-        cwd: projectDir,
-      });
+      const buildOut = execSync(
+        `docker build -f "${dockerfilePath}" -t ${imageTag} "${projectRoot}"`,
+        {
+          cwd: projectRoot,
+        }
+      );
       project.logs.build += buildOut.toString();
 
       const internalPort = 80;
@@ -229,7 +231,7 @@ async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
 
       const runOut = execSync(
         `docker run -d -p ${hostPort}:${internalPort} --name ${containerName} ${imageTag}`,
-        { cwd: projectDir }
+        { cwd: projectRoot }
       );
       project.logs.deploy += runOut.toString();
 

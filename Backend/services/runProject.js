@@ -37,14 +37,17 @@ const getPort = require("get-port");
 const fs = require("fs");
 const path = require("path");
 const yaml = require("js-yaml");
+const { resolveProjectRoot } = require("./projectSourceResolver");
 
-async function runProject(projectId) {
+async function runProject(projectId, startedByRole = "system") {
   const project = await Project.findById(projectId);
 
   if (!project) throw new Error("Project not found");
+  if (project.status === "running") throw new Error("Project is already running");
 
-  const projectDir = path.join(process.cwd(), "uploads", String(projectId));
-  const composeFile = path.join(projectDir, "docker-compose.yml");
+  const uploadRoot = path.join(process.cwd(), "uploads", String(projectId));
+  const { composePath } = resolveProjectRoot(uploadRoot);
+  const composeFile = composePath;
 
   // -----------------------------------------------------------
   // CASE 1: docker-compose project (microservices)
@@ -73,7 +76,7 @@ async function runProject(projectId) {
 // -----------------------------------------------------------
 // CASE 1: docker-compose project (microservices)
 // -----------------------------------------------------------
-if (fs.existsSync(composeFile)) {
+if (composeFile && fs.existsSync(composeFile)) {
   try {
     // Stop old containers
     try { execSync(`docker compose -f "${composeFile}" down`, { stdio: "ignore" }); } catch {}
@@ -89,7 +92,9 @@ if (fs.existsSync(composeFile)) {
 
     let frontendUrl = null;
 
-    for (const [serviceName, serviceDef] of Object.entries(composeConfig.services)) {
+    const services = composeConfig?.services || {};
+
+    for (const [serviceName, serviceDef] of Object.entries(services)) {
       if (!serviceDef.ports) continue;
 
       for (const port of serviceDef.ports) {
@@ -119,6 +124,10 @@ if (fs.existsSync(composeFile)) {
 
     project.url = frontendUrl;
     project.status = "running";
+    project.startHistory = [
+      ...(project.startHistory || []),
+      { timestamp: new Date(), startedByRole },
+    ];
     await project.save();
 
     return project.url;
@@ -145,6 +154,10 @@ if (fs.existsSync(composeFile)) {
     project.hostPort = hostPort;
     project.url = `http://localhost:${hostPort}`;
     project.status = "running";
+    project.startHistory = [
+      ...(project.startHistory || []),
+      { timestamp: new Date(), startedByRole },
+    ];
     await project.save();
 
     return project.url;

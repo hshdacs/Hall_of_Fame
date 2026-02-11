@@ -1,9 +1,11 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const routes = require('./routes/routes');
 const projectRoutes = require('./routes/project.router');
 const authRoutes = require('./routes/auth.routes');
+const adminQuotaRoutes = require('./routes/admin.quota.router');
 
 // Bull Board imports
 const { ExpressAdapter } = require('@bull-board/express');
@@ -20,6 +22,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // ===============================
 // Swagger Documentation
@@ -36,6 +39,7 @@ app.get('/', (req, res) => res.send('API running successfully 🚀'));
 // ===============================
 app.use('/api/auth', authRoutes);
 app.use('/api/project', projectRoutes);
+app.use('/api/admin', adminQuotaRoutes);
 app.use('/', routes);
 
 // ===============================

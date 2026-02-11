@@ -19,6 +19,7 @@ const projectSchema = new mongoose.Schema({
   githubUrl: { type: String },
   sourceType: { type: String }, // github | zip
   sourcePathOrUrl: { type: String },
+  ownerUserId: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
 
   // 🐳 Deployment & Build Info
   imageTag: { type: String },          // NEW
@@ -66,6 +67,13 @@ const projectSchema = new mongoose.Schema({
       timestamp: { type: Date, default: Date.now },
       status: { type: String },
       message: { type: String }
+    },
+  ],
+
+  startHistory: [
+    {
+      timestamp: { type: Date, default: Date.now },
+      startedByRole: { type: String },
     },
   ],
 });

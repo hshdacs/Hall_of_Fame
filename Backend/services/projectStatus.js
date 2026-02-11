@@ -1,8 +1,6 @@
 // services/projectStatus.js
 
 const { execSync } = require("child_process");
-const path = require("path");
-const fs = require("fs");
 
 function getProjectServices(projectId) {
   try {
@@ -18,7 +16,7 @@ function getProjectServices(projectId) {
     lines.forEach((line) => {
       const [name, image, ports] = line.split("|");
 
-      if (name.startsWith(projectId)) {
+      if (name.includes(projectId)) {
         services.push({
           name,
           image,

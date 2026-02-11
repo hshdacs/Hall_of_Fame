@@ -1,5 +1,7 @@
 const express = require("express");
 const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 const router = express.Router();
 
 const Project = require("../db/model/projectSchema");
@@ -7,6 +9,7 @@ const buildQueue = require("../queue/buildQueue");
 const { runProject } = require("../services/runProject");
 const { stopProject } = require("../services/stopProject");
 const { getProjectServices } = require("../services/projectStatus");
+const { enforceUploadQuota, enforceRunQuota } = require("../services/quotaService");
 
 const { auth, checkRole } = require("../middleware/authMiddleware");
 const upload = multer({ dest: "uploads/" });
@@ -154,38 +157,74 @@ router.post(
   "/upload",
   auth,
   checkRole(["student", "faculty", "admin"]),
-  upload.single("file"),
+  upload.fields([
+    { name: "file", maxCount: 1 },
+    { name: "projectImages", maxCount: 12 },
+  ]),
   async (req, res) => {
     try {
       const {
         studentName,
         regNumber,
+        batch,
+        course,
         projectTitle,
         description,
         githubUrl,
         technologiesUsed
       } = req.body;
 
+      const zipFile = req.files?.file?.[0];
+      const imageFiles = req.files?.projectImages || [];
       let sourceType, sourcePathOrUrl;
+      const normalizedGithubUrl = githubUrl?.trim();
 
-      if (githubUrl) {
+      if (normalizedGithubUrl && zipFile) {
+        return res.status(400).json({
+          message: "Provide either GitHub URL or ZIP file, not both",
+        });
+      }
+
+      if (normalizedGithubUrl) {
         sourceType = "github";
-        sourcePathOrUrl = githubUrl;
-      } else if (req.file) {
+        sourcePathOrUrl = normalizedGithubUrl;
+      } else if (zipFile) {
         sourceType = "zip";
-        sourcePathOrUrl = req.file.path;
+        sourcePathOrUrl = zipFile.path;
       } else {
         return res.status(400).json({ message: "Upload ZIP or GitHub URL" });
       }
 
+      await enforceUploadQuota({
+        userId: req.user.id,
+        role: req.user.role,
+        sourceType,
+        zipSizeBytes: zipFile?.size || 0,
+      });
+
+      const imageUrls = imageFiles.map((file) => {
+        const normalized = file.path.replace(/\\/g, "/");
+        const relativePath = normalized.startsWith("uploads/")
+          ? normalized.slice("uploads/".length)
+          : path.basename(normalized);
+        return `${req.protocol}://${req.get("host")}/uploads/${relativePath}`;
+      });
+
       const project = await Project.create({
         studentName,
         regNumber,
+        batch,
+        course: course?.toUpperCase?.() || course,
         projectTitle,
         longDescription: description,
-        technologiesUsed: technologiesUsed?.split(",") ?? [],
+        technologiesUsed: technologiesUsed
+          ? technologiesUsed.split(",").map((tech) => tech.trim()).filter(Boolean)
+          : [],
+        githubUrl: normalizedGithubUrl,
+        ownerUserId: req.user.id,
         sourceType,
         sourcePathOrUrl,
+        images: imageUrls,
         status: "queued",
         createdDate: new Date()
       });
@@ -201,8 +240,17 @@ router.post(
       });
 
     } catch (err) {
+      const allFiles = [
+        ...(req.files?.file || []),
+        ...(req.files?.projectImages || []),
+      ];
+      for (const file of allFiles) {
+        if (file.path && fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      }
       console.error("Upload error:", err);
-      res.status(500).json({ error: err.message });
+      res.status(err.statusCode || 500).json({ error: err.message });
     }
   }
 );
@@ -246,10 +294,15 @@ router.post(
   checkRole(["faculty", "admin"]),
   async (req, res) => {
     try {
-      const url = await runProject(req.params.id);
+      await enforceRunQuota({
+        projectId: req.params.id,
+        role: req.user.role,
+      });
+
+      const url = await runProject(req.params.id, req.user.role);
       res.json({ message: "Project started", url });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      res.status(err.statusCode || 500).json({ error: err.message });
     }
   }
 );
