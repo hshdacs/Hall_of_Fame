@@ -1,0 +1,30 @@
+.toast-wrap {
+  position: fixed;
+  right: 16px;
+  top: 16px;
+  z-index: 9999;
+  display: grid;
+  gap: 8px;
+}
+
+.toast-item {
+  min-width: 240px;
+  max-width: 360px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.toast-item.info {
+  background: #1a4fac;
+}
+
+.toast-item.success {
+  background: #168149;
+}
+
+.toast-item.error {
+  background: #b12525;
+}

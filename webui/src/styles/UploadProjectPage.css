@@ -59,6 +59,34 @@
   margin: 6px 0 14px;
 }
 
+.upload-error-box {
+  margin-bottom: 12px;
+  border: 1px solid #ffc7c7;
+  background: #fff1f1;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.upload-error-box h4 {
+  margin: 0 0 6px;
+  color: #a52525;
+}
+
+.upload-error-box pre {
+  margin: 0;
+  max-height: 140px;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: #7f1b1b;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+}
+
+.upload-error-box p {
+  margin: 8px 0 0;
+  color: #5a2323;
+}
+
 .panel {
   padding: 14px;
   margin-bottom: 12px;

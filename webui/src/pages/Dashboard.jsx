@@ -150,12 +150,14 @@ import { Container, Dialog, DialogContent, DialogTitle, Button } from "@mui/mate
 import SearchBar from "../components/Search";
 import "../styles/Dashboard.css";
 import Filter from "../components/Filter";
+import { useToast } from "../components/ToastProvider";
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [projects, setProjects] = useState([]);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const { toast } = useToast();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -183,12 +185,12 @@ const Dashboard = () => {
     const zipFile = document.getElementById("zipFile").files[0];
 
     if (!githubUrl && !zipFile) {
-      alert("Please provide either a GitHub URL or a ZIP file.");
+      toast("Please provide either a GitHub URL or a ZIP file.", "error");
       return;
     }
 
     if (githubUrl && zipFile) {
-      alert("Please choose only one source: GitHub URL or ZIP file.");
+      toast("Please choose only one source: GitHub URL or ZIP file.", "error");
       return;
     }
 
@@ -215,7 +217,7 @@ const Dashboard = () => {
 
     } catch (error) {
       console.error(error);
-      alert("Error uploading project!");
+      toast("Error uploading project!", "error");
     }
   };
 

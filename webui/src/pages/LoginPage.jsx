@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { saveSession } from "../lib/session";
+import { useToast } from "../components/ToastProvider";
 import "../styles/LoginPage.css";
 
 const LoginPage = () => {
@@ -10,6 +11,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const onLogin = async (e) => {
     e.preventDefault();
@@ -24,6 +26,7 @@ const LoginPage = () => {
         token: res.data.token,
         role: res.data.role,
         email,
+        user: res.data.user,
       });
       navigate("/landing");
     } catch (err) {
@@ -34,7 +37,7 @@ const LoginPage = () => {
   };
 
   const onSsoPlaceholder = (provider) => {
-    alert(`${provider} SSO will be wired once SRH credentials are provided.`);
+    toast(`${provider} SSO will be wired once credentials are provided.`, "info");
   };
 
   return (

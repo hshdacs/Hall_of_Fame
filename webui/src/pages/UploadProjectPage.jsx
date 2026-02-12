@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import SrhNavbar from "../components/SrhNavbar";
-import { getToken } from "../lib/session";
+import { getToken, getUserProfile } from "../lib/session";
+import { useToast } from "../components/ToastProvider";
 import "../styles/UploadProjectPage.css";
 
 const STACKS = [
@@ -10,14 +11,25 @@ const STACKS = [
   "Django", "Spring Boot", "Flask", "MongoDB", "PostgreSQL", "MySQL",
   "Redis", "Docker", "Kubernetes", "TensorFlow", "PyTorch", "OpenCV", "Java"
 ];
+const PROJECT_TAGS = [
+  "AI",
+  "Web",
+  "Mobile",
+  "Data Science",
+  "Cloud",
+  "Cybersecurity",
+  "IoT",
+  "Robotics",
+  "General",
+];
 
 const UploadProjectPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const buildError = location.state?.buildError || "";
+  const profile = getUserProfile();
   const [form, setForm] = useState({
-    studentName: "",
-    regNumber: "",
-    batch: "",
-    course: "ACS",
+    projectTag: "AI",
     projectTitle: "",
     description: "",
     githubUrl: "",
@@ -26,6 +38,7 @@ const UploadProjectPage = () => {
   const [images, setImages] = useState([]);
   const [techStack, setTechStack] = useState([]);
   const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
   const imagePreviews = useMemo(
     () => images.map((file) => ({ file, src: URL.createObjectURL(file) })),
@@ -41,18 +54,18 @@ const UploadProjectPage = () => {
   const onSubmit = async () => {
     const token = getToken();
     if (!token) {
-      alert("Please login first.");
+      toast("Please login first.", "error");
       navigate("/login");
       return;
     }
 
     if (!form.githubUrl.trim() && !zipFile) {
-      alert("Provide GitHub URL or ZIP file.");
+      toast("Provide GitHub URL or ZIP file.", "error");
       return;
     }
 
     if (form.githubUrl.trim() && zipFile) {
-      alert("Use only one source: GitHub URL or ZIP.");
+      toast("Use only one source: GitHub URL or ZIP.", "error");
       return;
     }
 
@@ -70,9 +83,9 @@ const UploadProjectPage = () => {
         },
       });
 
-      navigate(`/project/${res.data.projectId}`);
+      navigate(`/build-status/${res.data.projectId}`);
     } catch (err) {
-      alert(err?.response?.data?.error || "Upload failed");
+      toast(err?.response?.data?.error || "Upload failed", "error");
     } finally {
       setSaving(false);
     }
@@ -92,15 +105,26 @@ const UploadProjectPage = () => {
         <main className="upload-main">
           <h1>Write Project Documentation</h1>
           <p>Provide details, assets, and deployment source.</p>
+          {buildError && (
+            <div className="upload-error-box">
+              <h4>Previous build failed</h4>
+              <pre>{buildError}</pre>
+              <p>Fix the issue and upload again.</p>
+            </div>
+          )}
 
           <section className="panel">
             <div className="grid-two">
-              <input placeholder="Student Name" value={form.studentName} onChange={(e) => setForm({ ...form, studentName: e.target.value })} />
-              <input placeholder="Registration Number" value={form.regNumber} onChange={(e) => setForm({ ...form, regNumber: e.target.value })} />
-              <input placeholder="Batch (e.g. 2024-2025)" value={form.batch} onChange={(e) => setForm({ ...form, batch: e.target.value })} />
-              <select value={form.course} onChange={(e) => setForm({ ...form, course: e.target.value })}>
-                <option value="ACS">ACS - Applied Computer Science</option>
-                <option value="ADS">ADS - Applied Data Science</option>
+              <input placeholder="Student Name" value={profile.name || ""} readOnly />
+              <input placeholder="Registration Number" value={profile.regNumber || ""} readOnly />
+              <input placeholder="Batch" value={profile.batch || ""} readOnly />
+              <input placeholder="Course" value={profile.course || ""} readOnly />
+              <select value={form.projectTag} onChange={(e) => setForm({ ...form, projectTag: e.target.value })}>
+                {PROJECT_TAGS.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
               </select>
               <input className="full" placeholder="Project Title" value={form.projectTitle} onChange={(e) => setForm({ ...form, projectTitle: e.target.value })} />
               <textarea className="full" placeholder="Project Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />

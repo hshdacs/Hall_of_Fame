@@ -5,6 +5,7 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import SrhNavbar from "../components/SrhNavbar";
 import { getToken } from "../lib/session";
+import { useToast } from "../components/ToastProvider";
 import "../styles/ProjectWorkspacePage.css";
 
 const ProjectWorkspacePage = () => {
@@ -12,6 +13,7 @@ const ProjectWorkspacePage = () => {
   const [project, setProject] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const { toast } = useToast();
 
   const loadProject = async () => {
     try {
@@ -30,11 +32,12 @@ const ProjectWorkspacePage = () => {
     if (project?.images?.length) return project.images;
     return [];
   }, [project]);
+  const isRunning = project.status === "running";
 
   const callRunStop = async (type) => {
     const token = getToken();
     if (!token) {
-      alert("Please login first.");
+      toast("Please login first.", "error");
       return;
     }
     setBusy(true);
@@ -45,8 +48,12 @@ const ProjectWorkspacePage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       await loadProject();
+      toast(
+        type === "run" ? "Project started successfully." : "Project stopped successfully.",
+        "success"
+      );
     } catch (err) {
-      alert(err?.response?.data?.error || `Failed to ${type} project`);
+      toast(err?.response?.data?.error || `Failed to ${type} project`, "error");
     } finally {
       setBusy(false);
     }
@@ -79,6 +86,7 @@ const ProjectWorkspacePage = () => {
           <div className="meta-row">
             <span>{project.studentName || "Unknown"}</span>
             <span>{project.course || "NA"}</span>
+            <span>{project.projectTag || "General"}</span>
             <span className={`status status-${project.status}`}>{project.status}</span>
           </div>
 
@@ -112,17 +120,34 @@ const ProjectWorkspacePage = () => {
         <aside className="workspace-side">
           <div className="side-card">
             <h3>Run Controls</h3>
-            <button disabled={busy} onClick={() => callRunStop("run")}>
-              Start Project
+            <button
+              className={isRunning ? "stop" : ""}
+              disabled={busy}
+              onClick={() => callRunStop(isRunning ? "stop" : "run")}
+            >
+              {busy ? (
+                <span className="btn-loading">
+                  <span className="btn-spinner" />
+                  {isRunning ? "Stopping..." : "Starting..."}
+                </span>
+              ) : isRunning ? (
+                "Stop Project"
+              ) : (
+                "Start Project"
+              )}
             </button>
-            <button className="stop" disabled={busy} onClick={() => callRunStop("stop")}>
-              Stop Project
-            </button>
-            {project.url && project.url !== "docker-compose" && (
-              <a href={project.url} target="_blank" rel="noreferrer">
-                Open Live URL
-              </a>
-            )}
+
+            <div className="runtime-meta">
+              <div className={`runtime-status ${isRunning ? "active" : ""}`}>
+                <span className="status-dot" />
+                {isRunning ? "Running" : "Not running"}
+              </div>
+              {isRunning && project.url && project.url !== "docker-compose" && (
+                <a href={project.url} target="_blank" rel="noreferrer">
+                  Open Live URL
+                </a>
+              )}
+            </div>
           </div>
 
           <div className="side-card">

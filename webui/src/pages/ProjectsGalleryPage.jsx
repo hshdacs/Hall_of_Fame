@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import SrhNavbar from "../components/SrhNavbar";
 import "../styles/ProjectsGalleryPage.css";
 
 const ProjectsGalleryPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [projects, setProjects] = useState([]);
   const [search, setSearch] = useState("");
   const [course, setCourse] = useState("ALL");
+  const [tag, setTag] = useState("ALL");
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -22,6 +24,22 @@ const ProjectsGalleryPage = () => {
     fetchProjects();
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchParam = params.get("search");
+    const tagParam = params.get("tag");
+    if (searchParam) setSearch(searchParam);
+    if (tagParam) setTag(tagParam);
+  }, [location.search]);
+
+  const tags = useMemo(() => {
+    const set = new Set(["ALL"]);
+    projects.forEach((project) => {
+      if (project.projectTag) set.add(project.projectTag);
+    });
+    return [...set];
+  }, [projects]);
+
   const filtered = useMemo(() => {
     return projects.filter((project) => {
       const term = search.toLowerCase();
@@ -32,9 +50,10 @@ const ProjectsGalleryPage = () => {
 
       const normalizedCourse = (project.course || "").toUpperCase();
       const courseMatch = course === "ALL" ? true : normalizedCourse === course;
-      return textMatch && courseMatch;
+      const tagMatch = tag === "ALL" ? true : (project.projectTag || "General") === tag;
+      return textMatch && courseMatch && tagMatch;
     });
-  }, [projects, search, course]);
+  }, [projects, search, course, tag]);
 
   return (
     <div className="gallery-page">
@@ -51,6 +70,13 @@ const ProjectsGalleryPage = () => {
           <option value="ACS">ACS</option>
           <option value="ADS">ADS</option>
         </select>
+        <select value={tag} onChange={(e) => setTag(e.target.value)}>
+          {tags.map((item) => (
+            <option value={item} key={item}>
+              {item === "ALL" ? "All Tags" : item}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="cards-grid">
@@ -65,6 +91,7 @@ const ProjectsGalleryPage = () => {
               )}
               <div className="card-body">
                 <span className="tag">{project.course || "NA"}</span>
+                <span className="tag tag2">{project.projectTag || "General"}</span>
                 <h3>{project.projectTitle}</h3>
                 <p>{project.studentName || "Unknown Student"}</p>
               </div>

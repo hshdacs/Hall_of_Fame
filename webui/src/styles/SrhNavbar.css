@@ -1,39 +1,28 @@
+.srh-top-strip {
+  height: 50px;
+  background: #df4807;
+}
+
 .srh-nav {
   position: sticky;
-  top: 0;
+  top: 50px;
   z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
+  padding: 8px 20px;
   background: #07233b;
-  border-bottom: 3px solid #df4807;
 }
 
 .srh-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #fff;
 }
 
-.srh-logo {
-  font-weight: 800;
-  background: #df4807;
-  padding: 6px 10px;
-  border-radius: 8px;
-  letter-spacing: 0.8px;
-}
-
-.srh-title {
-  color: #fff;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.srh-sub {
-  color: #b8cad8;
-  font-size: 12px;
+.srh-brand-logo {
+  height: 42px;
+  width: auto;
+  display: block;
 }
 
 .srh-links {
@@ -77,6 +66,15 @@
 }
 
 @media (max-width: 900px) {
+  .srh-top-strip {
+    height: 42px;
+  }
+  .srh-nav {
+    top: 42px;
+  }
+  .srh-brand-logo {
+    height: 34px;
+  }
   .srh-links {
     display: none;
   }

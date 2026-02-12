@@ -1,16 +1,50 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import SrhNavbar from "../components/SrhNavbar";
+import SrhFooter from "../components/SrhFooter";
 import "../styles/LandingPage.css";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [projects, setProjects] = useState([]);
+  const [query, setQuery] = useState("");
+  const [tag, setTag] = useState("All");
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await axios.get("http://localhost:8020/api/project/all");
+        setProjects(Array.isArray(res.data) ? res.data : []);
+      } catch (_err) {
+        setProjects([]);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  const latestProjects = useMemo(() => projects.slice(0, 4), [projects]);
+  const tags = useMemo(() => {
+    const collected = new Set(["All", "AI", "Web", "Data Science", "Cloud"]);
+    projects.forEach((project) => {
+      if (project.projectTag) collected.add(project.projectTag);
+    });
+    return [...collected];
+  }, [projects]);
+
+  const onExplore = () => {
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("search", query.trim());
+    if (tag !== "All") params.set("tag", tag);
+    navigate(`/projects?${params.toString()}`);
+  };
 
   return (
     <div className="landing-page">
       <SrhNavbar />
 
-      <section className="hero">
+      <section className="hero-block">
+        <div className="hero">
         <h1>
           Showcase Your Innovation.
           <br />
@@ -20,11 +54,26 @@ const LandingPage = () => {
           A collaborative platform for SRH ACS and ADS students to upload,
           deploy, review, and present impactful academic projects.
         </p>
-        <div className="hero-actions">
-          <button onClick={() => navigate("/projects")}>Browse Projects</button>
-          <button className="outline" onClick={() => navigate("/upload")}>
-            Submit Project
-          </button>
+        <div className="hero-search">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by project name, tech, or topic..."
+          />
+          <select value={tag} onChange={(e) => setTag(e.target.value)}>
+            {tags.map((item) => (
+              <option value={item} key={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <button onClick={onExplore}>Explore</button>
+        </div>
+        <div className="hero-tags">
+          {tags.slice(1, 6).map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
         </div>
       </section>
 
@@ -42,6 +91,35 @@ const LandingPage = () => {
           <p>Discover cross-discipline projects from ACS and ADS cohorts.</p>
         </article>
       </section>
+
+      <section className="latest-wrap">
+        <div className="latest-head">
+          <h2>Latest Projects</h2>
+          <button onClick={() => navigate("/projects")}>View All Projects</button>
+        </div>
+        <div className="latest-grid">
+          {latestProjects.map((project) => (
+            <article
+              className="latest-card"
+              key={project._id}
+              onClick={() => navigate(`/project/${project._id}`)}
+            >
+              {project.images?.[0] ? (
+                <img src={project.images[0]} alt={project.projectTitle} />
+              ) : (
+                <div className="latest-placeholder">No Image</div>
+              )}
+              <div className="latest-body">
+                <span>{project.projectTag || "General"}</span>
+                <h3>{project.projectTitle}</h3>
+                <p>{project.studentName || "Unknown Student"}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <SrhFooter />
     </div>
   );
 };

@@ -121,18 +121,20 @@
 }
 
 .side-card h3 {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
+  color: #102743;
+  font-size: 22px;
 }
 
 .side-card button {
   width: 100%;
   border: 0;
   border-radius: 10px;
-  padding: 11px;
+  padding: 12px;
   font-weight: 700;
   color: #fff;
   background: #1b53a6;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   cursor: pointer;
 }
 
@@ -140,11 +142,70 @@
   background: #df4807;
 }
 
+.btn-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #fff;
+  animation: spinBtn 0.8s linear infinite;
+}
+
+.runtime-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #7f8c9b;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.runtime-status.active {
+  color: #12924f;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #98a7b6;
+}
+
+.runtime-status.active .status-dot {
+  background: #19c163;
+  box-shadow: 0 0 0 4px rgba(25, 193, 99, 0.18);
+}
+
 .side-card a {
-  display: inline-block;
-  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
   color: #1652a5;
   font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.runtime-meta {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+@keyframes spinBtn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .workspace-error {

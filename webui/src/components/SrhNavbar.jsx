@@ -14,31 +14,34 @@ const SrhNavbar = () => {
   };
 
   return (
-    <header className="srh-nav">
-      <div className="srh-brand">
-        <span className="srh-logo">SRH</span>
-        <div>
-          <div className="srh-title">Project Hub</div>
-          <div className="srh-sub">Applied Sciences</div>
+    <header>
+      <div className="srh-top-strip" />
+      <div className="srh-nav">
+        <div className="srh-brand">
+          <img
+            className="srh-brand-logo"
+            src="https://ecampus.srh-university.de/pluginfile.php/1/core_admin/logo/0x59/1770367721/University_neu.png"
+            alt="SRH University"
+          />
         </div>
-      </div>
 
-      <nav className="srh-links">
-        <Link to="/landing">Home</Link>
-        <Link to="/projects">Projects</Link>
-        <Link to="/upload">Upload</Link>
-        <Link to="/admin/monitoring">Monitor</Link>
-      </nav>
+        <nav className="srh-links">
+          <Link to="/landing">Home</Link>
+          <Link to="/projects">Projects</Link>
+          <Link to="/upload">Upload</Link>
+          <Link to="/admin/monitoring">Monitor</Link>
+        </nav>
 
-      <div className="srh-actions">
-        {loggedIn ? (
-          <>
-            <span className="role-chip">{role || "user"}</span>
-            <button onClick={onLogout}>Logout</button>
-          </>
-        ) : (
-          <button onClick={() => navigate("/login")}>Login</button>
-        )}
+        <div className="srh-actions">
+          {loggedIn ? (
+            <>
+              <span className="role-chip">{role || "user"}</span>
+              <button onClick={onLogout}>Logout</button>
+            </>
+          ) : (
+            <button onClick={() => navigate("/login")}>Login</button>
+          )}
+        </div>
       </div>
     </header>
   );
