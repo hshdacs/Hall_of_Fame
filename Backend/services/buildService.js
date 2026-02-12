@@ -130,13 +130,50 @@ const fs = require("fs");
 const path = require("path");
 const simpleGit = require("simple-git");
 const unzipper = require("unzipper");
-const { execSync } = require("child_process");
+const { spawn } = require("child_process");
 const getPort = require("get-port");
 
 const Project = require("../db/model/projectSchema");
 const { resolveProjectRoot } = require("./projectSourceResolver");
 
-async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
+function runCommandStream(command, { cwd, onOutput }) {
+  return new Promise((resolve, reject) => {
+    let combined = "";
+    const child = spawn(command, {
+      cwd,
+      shell: true,
+      env: process.env,
+    });
+
+    const handleChunk = (chunk) => {
+      const text = chunk.toString();
+      combined += text;
+      if (onOutput) onOutput(text);
+    };
+
+    child.stdout.on("data", handleChunk);
+    child.stderr.on("data", handleChunk);
+
+    child.on("error", (err) => {
+      reject(new Error(`${err.message}\n${combined}`));
+    });
+
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve(combined);
+      } else {
+        reject(new Error(combined || `Command failed with exit code ${code}`));
+      }
+    });
+  });
+}
+
+async function buildAndDeployProject(
+  projectId,
+  sourceType,
+  sourcePathOrUrl,
+  onLog = () => {}
+) {
   const git = simpleGit();
   const uploadRoot = path.join(process.cwd(), "uploads", String(projectId));
 
@@ -191,63 +228,70 @@ async function buildAndDeployProject(projectId, sourceType, sourcePathOrUrl) {
     // --- MULTI-SERVICE MODE ---
     if (hasCompose) {
       project.logs.build += `📦 Compose file detected at ${composePath} — building services...\n`;
-
-      const buildOut = execSync(`docker compose -f "${composePath}" build`, {
-        cwd: projectRoot,
-      });
-      project.logs.build += buildOut.toString();
-
-      const upOut = execSync(`docker compose -f "${composePath}" up -d`, {
-        cwd: projectRoot,
-      });
-      project.logs.deploy += upOut.toString();
-
-      project.status = "running";
-      project.url = "docker-compose";
+      onLog({ stream: "build", message: project.logs.build });
       await project.save();
 
-      return { success: true, url: "docker-compose" };
+      const buildOut = await runCommandStream(`docker compose -f "${composePath}" build`, {
+        cwd: projectRoot,
+        onOutput: (message) => onLog({ stream: "build", message }),
+      });
+      project.logs.build += buildOut || "";
+      await project.save();
+
+      project.logs.deploy += "✅ Build complete. Project is ready to start.\n";
+      onLog({ stream: "deploy", message: "✅ Build complete. Project is ready to start.\n" });
+      project.status = "ready";
+      project.url = null;
+      await project.save();
+
+      return { success: true, url: null };
     }
 
     // --- SINGLE-DOCKERFILE MODE ---
     if (hasDockerfile) {
       project.logs.build += `🐳 Dockerfile found at ${dockerfilePath} — building image...\n`;
+      onLog({ stream: "build", message: project.logs.build });
+      await project.save();
 
       const imageTag = `project_${projectId}`;
       const containerName = `container_${projectId}`;
 
-      const buildOut = execSync(
+      const buildOut = await runCommandStream(
         `docker build -f "${dockerfilePath}" -t ${imageTag} "${projectRoot}"`,
         {
           cwd: projectRoot,
+          onOutput: (message) => onLog({ stream: "build", message }),
         }
       );
-      project.logs.build += buildOut.toString();
+      project.logs.build += buildOut || "";
+      await project.save();
 
       const internalPort = 80;
       const hostPort = await getPort({
         port: getPort.makeRange(8000, 9999),
       });
 
-      const runOut = execSync(
-        `docker run -d -p ${hostPort}:${internalPort} --name ${containerName} ${imageTag}`,
-        { cwd: projectRoot }
-      );
-      project.logs.deploy += runOut.toString();
+      project.logs.deploy += "✅ Image build complete. Project is ready to start.\n";
+      onLog({
+        stream: "deploy",
+        message: "✅ Image build complete. Project is ready to start.\n",
+      });
+      await project.save();
 
       project.imageTag = imageTag;
       project.containerName = containerName;
       project.internalPort = internalPort;
-      project.hostPort = hostPort;
-      project.url = `http://localhost:${hostPort}`;
-      project.status = "running";
+      project.hostPort = hostPort; // reserved port hint; runtime may choose new free port
+      project.url = null;
+      project.status = "ready";
       await project.save();
 
-      return { success: true, url: project.url };
+      return { success: true, url: null };
     }
   } catch (err) {
     project.status = "build_failed";
     project.logs.build += `❌ ERROR: ${err.message}\n`;
+    onLog({ stream: "build", message: `\n❌ ERROR: ${err.message}\n` });
     await project.save();
     return { success: false, error: err.message };
   }

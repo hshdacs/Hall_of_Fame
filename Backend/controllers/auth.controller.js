@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "supersecret123";
 // REGISTER USER
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, regNumber, batch, course } = req.body;
 
     // Check if user exists
     const existing = await User.findOne({ email });
@@ -22,6 +22,9 @@ exports.register = async (req, res) => {
     const user = await User.create({
       name,
       email,
+      regNumber,
+      batch,
+      course: course?.toUpperCase?.() || course,
       // Password is hashed by userSchema pre-save hook
       password,
       role: assignedRole
@@ -52,7 +55,15 @@ exports.login = async (req, res) => {
     if (!valid) return res.status(400).json({ message: "Invalid email or password" });
 
     // JWT Payload
-    const payload = { id: user._id, role: user.role };
+    const payload = {
+      id: user._id,
+      role: user.role,
+      name: user.name,
+      email: user.email,
+      regNumber: user.regNumber || "",
+      batch: user.batch || "",
+      course: user.course || "",
+    };
 
     // Generate token
     const token = jwt.sign(payload, JWT_SECRET, {
@@ -63,7 +74,15 @@ exports.login = async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       token,
-      role: user.role
+      role: user.role,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        regNumber: user.regNumber || "",
+        batch: user.batch || "",
+        course: user.course || "",
+      },
     });
 
   } catch (err) {

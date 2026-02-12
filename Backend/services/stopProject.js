@@ -48,6 +48,8 @@ async function stopProject(projectId) {
       execSync(`docker compose -f "${composePath}" down`, { stdio: "inherit" });
 
       project.status = "stopped";
+      project.url = null;
+      project.frontendPort = null;
       await project.save();
       return;
     }
@@ -67,6 +69,8 @@ async function stopProject(projectId) {
     }
 
     project.status = "stopped";
+    project.url = null;
+    project.hostPort = null;
     await project.save();
   } catch (err) {
     console.error("Error stopping project:", err);

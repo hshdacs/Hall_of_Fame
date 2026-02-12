@@ -15,6 +15,7 @@ const projectSchema = new mongoose.Schema({
 
   // 📁 Project Metadata
   projectTitle: { type: String, required: true },
+  projectTag: { type: String },
   longDescription: { type: String },
   githubUrl: { type: String },
   sourceType: { type: String }, // github | zip

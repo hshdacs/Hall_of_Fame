@@ -163,11 +163,21 @@ router.post(
   ]),
   async (req, res) => {
     try {
+      const tokenProfile = {
+        studentName: req.user.name || "",
+        regNumber: req.user.regNumber || "",
+        batch: req.user.batch || "",
+        course: req.user.course || "",
+      };
+
+      if (!tokenProfile.studentName || !tokenProfile.regNumber || !tokenProfile.course) {
+        return res.status(400).json({
+          error: "User profile missing name/regNumber/course. Update profile claims and re-login.",
+        });
+      }
+
       const {
-        studentName,
-        regNumber,
-        batch,
-        course,
+        projectTag,
         projectTitle,
         description,
         githubUrl,
@@ -211,10 +221,11 @@ router.post(
       });
 
       const project = await Project.create({
-        studentName,
-        regNumber,
-        batch,
-        course: course?.toUpperCase?.() || course,
+        studentName: tokenProfile.studentName,
+        regNumber: tokenProfile.regNumber,
+        batch: tokenProfile.batch,
+        course: tokenProfile.course?.toUpperCase?.() || tokenProfile.course,
+        projectTag: projectTag?.trim() || "General",
         projectTitle,
         longDescription: description,
         technologiesUsed: technologiesUsed
