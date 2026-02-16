@@ -4,15 +4,16 @@
 }
 
 .workspace-grid {
-  max-width: 1200px;
+  width: min(1760px, calc(100vw - 36px));
   margin: 20px auto;
-  padding: 0 20px 28px;
+  padding: 0 8px 28px;
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 260px minmax(780px, 1fr) 340px;
   gap: 16px;
 }
 
 .workspace-main,
+.workspace-left-nav,
 .workspace-side .side-card {
   background: #fff;
   border: 1px solid #e2e9f0;
@@ -22,6 +23,14 @@
 
 .workspace-main {
   padding: 16px;
+}
+
+.workspace-left-nav {
+  padding: 14px;
+  height: fit-content;
+  align-self: start;
+  position: sticky;
+  top: 94px;
 }
 
 .workspace-main h1 {
@@ -88,10 +97,107 @@
   color: #112843;
 }
 
+.content-tabs-layout {
+  margin-top: 18px;
+  border-top: 1px solid #edf1f6;
+  padding-top: 12px;
+}
+
+.content-tabs-nav {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.content-tabs-nav button {
+  border: 1px solid #dce6f1;
+  background: #fff;
+  color: #17324f;
+  border-radius: 10px;
+  text-align: left;
+  font-weight: 700;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.content-tabs-nav button.active {
+  background: #e9f4ff;
+  border-color: #bfd9ff;
+  color: #174893;
+}
+
+.content-tabs-panel {
+  min-height: 200px;
+}
+
 .workspace-section p {
   margin: 0;
   color: #50667b;
   line-height: 1.65;
+}
+
+.comment-list {
+  display: grid;
+  gap: 10px;
+}
+
+.comment-item {
+  border: 1px solid #e4ebf4;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f9fbff;
+}
+
+.comment-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.comment-head span {
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #62798f;
+  font-size: 11px;
+}
+
+.comment-item p {
+  margin: 0;
+  color: #42586f;
+}
+
+.comment-empty {
+  color: #6a8096;
+  font-size: 14px;
+}
+
+.comment-form {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.comment-form textarea {
+  width: 100%;
+  min-height: 86px;
+  border: 1px solid #d7e2ee;
+  border-radius: 10px;
+  padding: 10px;
+  resize: vertical;
+  font-size: 14px;
+}
+
+.comment-form button {
+  width: fit-content;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  color: #fff;
+  background: #1b53a6;
+  cursor: pointer;
 }
 
 .stack-list {
@@ -199,6 +305,114 @@
   gap: 10px;
 }
 
+.remark-form {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.remark-form textarea {
+  width: 100%;
+  min-height: 96px;
+  border: 1px solid #d7e2ee;
+  border-radius: 10px;
+  padding: 10px;
+  resize: vertical;
+  font-size: 14px;
+}
+
+.publish-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #45607a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.remark-list {
+  display: grid;
+  gap: 10px;
+}
+
+.remark-item {
+  border: 1px solid #e4ebf4;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f9fbff;
+}
+
+.remark-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.remark-head strong {
+  color: #17304b;
+  font-size: 13px;
+}
+
+.remark-head span {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.remark-head .published {
+  color: #0f8b4d;
+  background: #e0f8ea;
+}
+
+.remark-head .draft {
+  color: #935f00;
+  background: #fff2dd;
+}
+
+.remark-item p {
+  margin: 0;
+  color: #42586f;
+}
+
+.remark-toggle-btn {
+  width: auto !important;
+  margin-top: 8px;
+  margin-bottom: 0 !important;
+  padding: 8px 12px !important;
+  font-size: 12px;
+}
+
+.share-actions {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.share-actions button {
+  margin-bottom: 0;
+  background: #0c375f;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.resource-links-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #405a72;
+}
+
+.resource-links-list a {
+  color: #1450a2;
+  text-decoration: underline;
+}
+
+.project-team-list .team-item button {
+  display: none;
+}
+
 @keyframes spinBtn {
   from {
     transform: rotate(0deg);
@@ -217,5 +431,13 @@
 @media (max-width: 980px) {
   .workspace-grid {
     grid-template-columns: 1fr;
+  }
+
+  .workspace-left-nav {
+    position: static;
+  }
+
+  .content-tabs-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

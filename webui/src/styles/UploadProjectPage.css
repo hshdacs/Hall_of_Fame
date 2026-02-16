@@ -204,6 +204,85 @@
   color: #607a90;
 }
 
+.team-selector-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.team-selector-row select {
+  flex: 1;
+}
+
+.team-selector-row button {
+  border: 0;
+  border-radius: 9px;
+  padding: 10px 14px;
+  color: #fff;
+  font-weight: 700;
+  background: #1a4fac;
+  cursor: pointer;
+}
+
+.team-list {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.team-list p {
+  margin: 0;
+  color: #607a90;
+}
+
+.team-item {
+  border: 1px solid #d7e2ee;
+  border-radius: 9px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-item span {
+  color: #183450;
+  font-size: 14px;
+}
+
+.team-item button {
+  border: 0;
+  background: #e24b09;
+  color: #fff;
+  border-radius: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.doc-textarea {
+  width: 100%;
+  min-height: 130px;
+  border: 1px solid #dbe4ef;
+  border-radius: 10px;
+  padding: 11px;
+  resize: vertical;
+}
+
+.resource-docs {
+  margin-top: 10px;
+}
+
+.resource-docs h4 {
+  margin: 0 0 8px;
+  color: #16324f;
+}
+
+.resource-docs ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: #607a90;
+}
+
 .stack-pick {
   display: flex;
   flex-wrap: wrap;

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import SrhNavbar from "../components/SrhNavbar";
@@ -37,6 +37,12 @@ const UploadProjectPage = () => {
   const [zipFile, setZipFile] = useState(null);
   const [images, setImages] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
+  const [resourceDocs, setResourceDocs] = useState([]);
+  const [resourceLinksText, setResourceLinksText] = useState("");
+  const [documentation, setDocumentation] = useState("");
+  const [students, setStudents] = useState([]);
+  const [teammates, setTeammates] = useState([]);
+  const [selectedTeammateEmail, setSelectedTeammateEmail] = useState("");
   const [techStack, setTechStack] = useState([]);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -50,6 +56,47 @@ const UploadProjectPage = () => {
     setTechStack((prev) =>
       prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]
     );
+  };
+
+  useEffect(() => {
+    const loadStudents = async () => {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await axios.get("http://localhost:8020/api/auth/users/basic", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setStudents(res.data || []);
+      } catch (_err) {
+        setStudents([]);
+      }
+    };
+    loadStudents();
+  }, []);
+
+  const addTeammateByEmail = () => {
+    if (!selectedTeammateEmail) return;
+    const match = students.find((s) => s.email === selectedTeammateEmail);
+    if (!match) return;
+    const alreadyAdded = teammates.some((t) => t.email === match.email);
+    const isSelf = String(match.email).toLowerCase() === String(profile.email || "").toLowerCase();
+    if (alreadyAdded || isSelf) return;
+
+    setTeammates((prev) => [
+      ...prev,
+      {
+        userId: match._id,
+        name: match.name || "",
+        email: match.email || "",
+        regNumber: match.regNumber || "",
+        course: match.course || "",
+      },
+    ]);
+    setSelectedTeammateEmail("");
+  };
+
+  const removeTeammate = (email) => {
+    setTeammates((prev) => prev.filter((item) => item.email !== email));
   };
 
   const onSubmit = async () => {
@@ -74,10 +121,14 @@ const UploadProjectPage = () => {
     try {
       const data = new FormData();
       Object.entries(form).forEach(([key, value]) => data.append(key, value));
+      data.append("documentation", documentation);
+      data.append("resourceLinks", resourceLinksText);
+      data.append("teamMembers", JSON.stringify(teammates));
       data.append("technologiesUsed", techStack.join(","));
       if (zipFile) data.append("file", zipFile);
       images.forEach((image) => data.append("projectImages", image));
       if (videoFile) data.append("projectVideo", videoFile);
+      resourceDocs.forEach((doc) => data.append("resourceDocs", doc));
 
       const res = await axios.post("http://localhost:8020/api/project/upload", data, {
         headers: {
@@ -161,6 +212,79 @@ const UploadProjectPage = () => {
                 disabled={saving}
               />
               {videoFile && <p>{videoFile.name}</p>}
+            </div>
+          </section>
+
+          <section className="panel">
+            <h3>Team</h3>
+            <div className="team-selector-row">
+              <select
+                value={selectedTeammateEmail}
+                onChange={(e) => setSelectedTeammateEmail(e.target.value)}
+                disabled={saving}
+              >
+                <option value="">Select teammate</option>
+                {students.map((student) => (
+                  <option key={student._id} value={student.email}>
+                    {student.name} ({student.email})
+                  </option>
+                ))}
+              </select>
+              <button type="button" onClick={addTeammateByEmail} disabled={saving}>
+                Add Teammate
+              </button>
+            </div>
+            <div className="team-list">
+              {teammates.length === 0 && <p>No teammates added (solo by default).</p>}
+              {teammates.map((member) => (
+                <div key={member.email} className="team-item">
+                  <span>
+                    {member.name} - {member.email}
+                  </span>
+                  <button type="button" onClick={() => removeTeammate(member.email)} disabled={saving}>
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="panel">
+            <h3>Documentation</h3>
+            <textarea
+              className="doc-textarea"
+              placeholder="Write project documentation, architecture notes, setup steps..."
+              value={documentation}
+              onChange={(e) => setDocumentation(e.target.value)}
+              disabled={saving}
+            />
+          </section>
+
+          <section className="panel">
+            <h3>Resources</h3>
+            <textarea
+              className="doc-textarea"
+              placeholder="Paste reference links, one per line"
+              value={resourceLinksText}
+              onChange={(e) => setResourceLinksText(e.target.value)}
+              disabled={saving}
+            />
+            <div className="resource-docs">
+              <h4>Reference PDFs / Notes (optional)</h4>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.txt"
+                multiple
+                onChange={(e) => setResourceDocs(Array.from(e.target.files || []))}
+                disabled={saving}
+              />
+              {resourceDocs.length > 0 && (
+                <ul>
+                  {resourceDocs.map((doc) => (
+                    <li key={doc.name}>{doc.name}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           </section>
 
