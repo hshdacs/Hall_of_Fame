@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import SrhNavbar from "../components/SrhNavbar";
@@ -41,6 +41,39 @@ const PROJECT_TAGS = [
   "General",
 ];
 
+const UPLOAD_DRAFT_KEY = "hof_upload_project_draft_v1";
+
+const readUploadDraft = () => {
+  try {
+    const raw = localStorage.getItem(UPLOAD_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_err) {
+    return null;
+  }
+};
+
+const isValidGithubRepoUrl = (value) => {
+  if (!value) return false;
+  try {
+    const parsed = new URL(value.trim());
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    if (!["http:", "https:"].includes(parsed.protocol) || host !== "github.com") {
+      return false;
+    }
+    if (parsed.search || parsed.hash) return false;
+
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    if (segments.length !== 2) return false;
+
+    const [owner, rawRepo] = segments;
+    const repo = rawRepo.endsWith(".git") ? rawRepo.slice(0, -4) : rawRepo;
+    const partRegex = /^[A-Za-z0-9._-]+$/;
+    return Boolean(owner && repo && partRegex.test(owner) && partRegex.test(repo));
+  } catch (_err) {
+    return false;
+  }
+};
+
 const UploadProjectPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,9 +90,13 @@ const UploadProjectPage = () => {
     githubUrl: "",
   });
   const [zipFile, setZipFile] = useState(null);
+  const [zipFileName, setZipFileName] = useState("");
   const [images, setImages] = useState([]);
+  const [imageFileNames, setImageFileNames] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
+  const [videoFileName, setVideoFileName] = useState("");
   const [resourceDocs, setResourceDocs] = useState([]);
+  const [resourceDocNames, setResourceDocNames] = useState([]);
   const [resourceLinksText, setResourceLinksText] = useState("");
   const [documentation, setDocumentation] = useState("");
   const [students, setStudents] = useState([]);
@@ -67,6 +104,7 @@ const UploadProjectPage = () => {
   const [selectedTeammateEmail, setSelectedTeammateEmail] = useState("");
   const [techStack, setTechStack] = useState([]);
   const [saving, setSaving] = useState(false);
+  const hydratedRef = useRef(false);
 
   const imagePreviews = useMemo(
     () => images.map((file) => ({ file, src: URL.createObjectURL(file) })),
@@ -105,19 +143,98 @@ const UploadProjectPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!uploadDraft) return;
-
-    setForm((prev) => ({ ...prev, ...(uploadDraft.form || {}) }));
-    setZipFile(uploadDraft.zipFile || null);
-    setImages(Array.isArray(uploadDraft.images) ? uploadDraft.images : []);
-    setVideoFile(uploadDraft.videoFile || null);
-    setResourceDocs(Array.isArray(uploadDraft.resourceDocs) ? uploadDraft.resourceDocs : []);
-    setResourceLinksText(uploadDraft.resourceLinksText || "");
-    setDocumentation(uploadDraft.documentation || "");
-    setTeammates(Array.isArray(uploadDraft.teammates) ? uploadDraft.teammates : []);
-    setTechStack(Array.isArray(uploadDraft.techStack) ? uploadDraft.techStack : []);
-    setStep(uploadDraft.step || 1);
+    const persistedDraft = readUploadDraft();
+    const draftSource = uploadDraft || persistedDraft;
+    if (draftSource) {
+      setForm((prev) => ({ ...prev, ...(draftSource.form || {}) }));
+      setZipFile(draftSource.zipFile || null);
+      setZipFileName(draftSource.zipFileName || draftSource.zipFile?.name || "");
+      setImages(Array.isArray(draftSource.images) ? draftSource.images : []);
+      setImageFileNames(
+        Array.isArray(draftSource.imageFileNames)
+          ? draftSource.imageFileNames
+          : Array.isArray(draftSource.images)
+            ? draftSource.images.map((file) => file?.name).filter(Boolean)
+            : []
+      );
+      setVideoFile(draftSource.videoFile || null);
+      setVideoFileName(draftSource.videoFileName || draftSource.videoFile?.name || "");
+      setResourceDocs(Array.isArray(draftSource.resourceDocs) ? draftSource.resourceDocs : []);
+      setResourceDocNames(
+        Array.isArray(draftSource.resourceDocNames)
+          ? draftSource.resourceDocNames
+          : Array.isArray(draftSource.resourceDocs)
+            ? draftSource.resourceDocs.map((file) => file?.name).filter(Boolean)
+            : []
+      );
+      setResourceLinksText(draftSource.resourceLinksText || "");
+      setDocumentation(draftSource.documentation || "");
+      setTeammates(Array.isArray(draftSource.teammates) ? draftSource.teammates : []);
+      setTechStack(Array.isArray(draftSource.techStack) ? draftSource.techStack : []);
+      setStep(draftSource.step || 1);
+    }
   }, [uploadDraft]);
+
+  useEffect(() => {
+    if (!hydratedRef.current) {
+      hydratedRef.current = true;
+      return;
+    }
+
+    const draft = {
+      step,
+      form,
+      zipFileName: zipFile?.name || zipFileName,
+      imageFileNames: images.length > 0 ? images.map((file) => file.name) : imageFileNames,
+      videoFileName: videoFile?.name || videoFileName,
+      resourceDocNames:
+        resourceDocs.length > 0 ? resourceDocs.map((file) => file.name) : resourceDocNames,
+      resourceLinksText,
+      documentation,
+      teammates,
+      techStack,
+    };
+    localStorage.setItem(UPLOAD_DRAFT_KEY, JSON.stringify(draft));
+  }, [
+    step,
+    form,
+    zipFile,
+    zipFileName,
+    images,
+    imageFileNames,
+    videoFile,
+    videoFileName,
+    resourceDocs,
+    resourceDocNames,
+    resourceLinksText,
+    documentation,
+    teammates,
+    techStack,
+  ]);
+
+  const handleZipChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setZipFile(file);
+    setZipFileName(file?.name || "");
+  };
+
+  const handleImagesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    setImages(files);
+    setImageFileNames(files.map((file) => file.name));
+  };
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setVideoFile(file);
+    setVideoFileName(file?.name || "");
+  };
+
+  const handleResourceDocsChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    setResourceDocs(files);
+    setResourceDocNames(files.map((file) => file.name));
+  };
 
   const toggleStack = (item) => {
     setTechStack((prev) =>
@@ -168,6 +285,10 @@ const UploadProjectPage = () => {
       toast("Use only one source: GitHub URL or ZIP.", "error");
       return false;
     }
+    if (form.githubUrl.trim() && !isValidGithubRepoUrl(form.githubUrl)) {
+      toast("Enter a valid GitHub repo URL (example: https://github.com/owner/repo).", "error");
+      return false;
+    }
     if (techStack.length === 0) {
       toast("Select at least one technology.", "error");
       return false;
@@ -211,9 +332,13 @@ const UploadProjectPage = () => {
         step,
         form,
         zipFile,
+        zipFileName: zipFile?.name || zipFileName,
         images,
+        imageFileNames: images.map((file) => file.name),
         videoFile,
+        videoFileName: videoFile?.name || videoFileName,
         resourceDocs,
+        resourceDocNames: resourceDocs.map((file) => file.name),
         resourceLinksText,
         documentation,
         teammates,
@@ -342,9 +467,10 @@ const UploadProjectPage = () => {
                     className="full"
                     type="file"
                     accept=".zip"
-                    onChange={(e) => setZipFile(e.target.files?.[0] || null)}
+                    onChange={handleZipChange}
                     disabled={saving}
                   />
+                  {zipFileName && <p className="comment-empty">Selected ZIP: {zipFileName}</p>}
                 </div>
               </section>
 
@@ -414,7 +540,7 @@ const UploadProjectPage = () => {
                   type="file"
                   accept="image/*"
                   multiple
-                  onChange={(e) => setImages(Array.from(e.target.files || []))}
+                  onChange={handleImagesChange}
                   disabled={saving}
                 />
                 <div className="preview-grid">
@@ -422,16 +548,19 @@ const UploadProjectPage = () => {
                     <img key={index} src={image.src} alt={`preview-${index}`} />
                   ))}
                 </div>
+                {imagePreviews.length === 0 && imageFileNames.length > 0 && (
+                  <p className="comment-empty">Selected images: {imageFileNames.join(", ")}</p>
+                )}
 
                 <div className="video-upload">
                   <h4>Project Demo Video (optional)</h4>
                   <input
                     type="file"
                     accept="video/*"
-                    onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+                    onChange={handleVideoChange}
                     disabled={saving}
                   />
-                  {videoFile && <p>{videoFile.name}</p>}
+                  {(videoFile?.name || videoFileName) && <p>{videoFile?.name || videoFileName}</p>}
                 </div>
               </section>
 
@@ -461,13 +590,16 @@ const UploadProjectPage = () => {
                     type="file"
                     accept=".pdf,.doc,.docx,.txt"
                     multiple
-                    onChange={(e) => setResourceDocs(Array.from(e.target.files || []))}
+                    onChange={handleResourceDocsChange}
                     disabled={saving}
                   />
-                  {resourceDocs.length > 0 && (
+                  {(resourceDocs.length > 0 || resourceDocNames.length > 0) && (
                     <ul>
-                      {resourceDocs.map((doc) => (
-                        <li key={doc.name}>{doc.name}</li>
+                      {(resourceDocs.length > 0
+                        ? resourceDocs.map((doc) => doc.name)
+                        : resourceDocNames
+                      ).map((docName) => (
+                        <li key={docName}>{docName}</li>
                       ))}
                     </ul>
                   )}
@@ -502,7 +634,7 @@ const UploadProjectPage = () => {
                   </p>
                   <p>
                     <strong>Source:</strong>{" "}
-                    {form.githubUrl.trim() ? form.githubUrl.trim() : zipFile?.name || "-"}
+                    {form.githubUrl.trim() ? form.githubUrl.trim() : zipFile?.name || zipFileName || "-"}
                   </p>
                 </div>
 
@@ -528,10 +660,12 @@ const UploadProjectPage = () => {
                 <div className="review-block">
                   <h4>Assets & Media</h4>
                   <p>
-                    <strong>Images:</strong> {images.length}
+                    <strong>Images:</strong>{" "}
+                    {images.length > 0 ? images.length : imageFileNames.length}
                   </p>
                   <p>
-                    <strong>Video:</strong> {videoFile ? videoFile.name : "Not added"}
+                    <strong>Video:</strong>{" "}
+                    {videoFile?.name || videoFileName || "Not added"}
                   </p>
                 </div>
 
@@ -542,7 +676,9 @@ const UploadProjectPage = () => {
 
                 <div className="review-block">
                   <h4>Resources</h4>
-                  {resourceLinks.length === 0 && resourceDocs.length === 0 && <p>-</p>}
+                  {resourceLinks.length === 0 &&
+                    resourceDocs.length === 0 &&
+                    resourceDocNames.length === 0 && <p>-</p>}
                   {resourceLinks.length > 0 && (
                     <>
                       <p>
@@ -555,14 +691,17 @@ const UploadProjectPage = () => {
                       </ul>
                     </>
                   )}
-                  {resourceDocs.length > 0 && (
+                  {(resourceDocs.length > 0 || resourceDocNames.length > 0) && (
                     <>
                       <p>
                         <strong>Files</strong>
                       </p>
                       <ul>
-                        {resourceDocs.map((doc) => (
-                          <li key={doc.name}>{doc.name}</li>
+                        {(resourceDocs.length > 0
+                          ? resourceDocs.map((doc) => doc.name)
+                          : resourceDocNames
+                        ).map((docName) => (
+                          <li key={docName}>{docName}</li>
                         ))}
                       </ul>
                     </>

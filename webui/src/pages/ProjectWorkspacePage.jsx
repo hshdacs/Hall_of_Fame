@@ -78,7 +78,7 @@ const ProjectWorkspacePage = () => {
     project?.ownerUserId &&
     String(project.ownerUserId) === String(currentUserId);
   const canSeeEvaluationPanel = canCreateRemarks || isOwnerStudent;
-  const canSeeBuildLogs = role === "student" || canCreateRemarks;
+  const canSeeBuildLogs = canCreateRemarks || isOwnerStudent;
   const teamMembers = Array.isArray(project?.teamMembers) ? project.teamMembers : [];
   const resourceLinks = Array.isArray(project?.resourceLinks) ? project.resourceLinks : [];
   const resourceFiles = Array.isArray(project?.resourceFiles) ? project.resourceFiles : [];
