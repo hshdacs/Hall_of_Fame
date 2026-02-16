@@ -36,6 +36,7 @@ const UploadProjectPage = () => {
   });
   const [zipFile, setZipFile] = useState(null);
   const [images, setImages] = useState([]);
+  const [videoFile, setVideoFile] = useState(null);
   const [techStack, setTechStack] = useState([]);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -76,6 +77,7 @@ const UploadProjectPage = () => {
       data.append("technologiesUsed", techStack.join(","));
       if (zipFile) data.append("file", zipFile);
       images.forEach((image) => data.append("projectImages", image));
+      if (videoFile) data.append("projectVideo", videoFile);
 
       const res = await axios.post("http://localhost:8020/api/project/upload", data, {
         headers: {
@@ -94,6 +96,15 @@ const UploadProjectPage = () => {
   return (
     <div className="upload-page">
       <SrhNavbar />
+      {saving && (
+        <div className="submit-overlay" role="status" aria-live="polite" aria-label="Submitting project">
+          <div className="submit-overlay-card">
+            <div className="submit-spinner" />
+            <h3>Submitting project...</h3>
+            <p>Please wait while we upload files and queue your build.</p>
+          </div>
+        </div>
+      )}
       <div className="upload-layout">
         <aside className="upload-sidebar">
           <h3>Submission Progress</h3>
@@ -115,31 +126,41 @@ const UploadProjectPage = () => {
 
           <section className="panel">
             <div className="grid-two">
-              <input placeholder="Student Name" value={profile.name || ""} readOnly />
-              <input placeholder="Registration Number" value={profile.regNumber || ""} readOnly />
-              <input placeholder="Batch" value={profile.batch || ""} readOnly />
-              <input placeholder="Course" value={profile.course || ""} readOnly />
-              <select value={form.projectTag} onChange={(e) => setForm({ ...form, projectTag: e.target.value })}>
+              <input placeholder="Student Name" value={profile.name || ""} readOnly disabled={saving} />
+              <input placeholder="Registration Number" value={profile.regNumber || ""} readOnly disabled={saving} />
+              <input placeholder="Batch" value={profile.batch || ""} readOnly disabled={saving} />
+              <input placeholder="Course" value={profile.course || ""} readOnly disabled={saving} />
+              <select value={form.projectTag} onChange={(e) => setForm({ ...form, projectTag: e.target.value })} disabled={saving}>
                 {PROJECT_TAGS.map((tag) => (
                   <option key={tag} value={tag}>
                     {tag}
                   </option>
                 ))}
               </select>
-              <input className="full" placeholder="Project Title" value={form.projectTitle} onChange={(e) => setForm({ ...form, projectTitle: e.target.value })} />
-              <textarea className="full" placeholder="Project Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-              <input className="full" placeholder="GitHub URL (optional if ZIP used)" value={form.githubUrl} onChange={(e) => setForm({ ...form, githubUrl: e.target.value })} />
-              <input className="full" type="file" accept=".zip" onChange={(e) => setZipFile(e.target.files?.[0] || null)} />
+              <input className="full" placeholder="Project Title" value={form.projectTitle} onChange={(e) => setForm({ ...form, projectTitle: e.target.value })} disabled={saving} />
+              <textarea className="full" placeholder="Project Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} disabled={saving} />
+              <input className="full" placeholder="GitHub URL (optional if ZIP used)" value={form.githubUrl} onChange={(e) => setForm({ ...form, githubUrl: e.target.value })} disabled={saving} />
+              <input className="full" type="file" accept=".zip" onChange={(e) => setZipFile(e.target.files?.[0] || null)} disabled={saving} />
             </div>
           </section>
 
           <section className="panel">
             <h3>Image Gallery</h3>
-            <input type="file" accept="image/*" multiple onChange={(e) => setImages(Array.from(e.target.files || []))} />
+            <input type="file" accept="image/*" multiple onChange={(e) => setImages(Array.from(e.target.files || []))} disabled={saving} />
             <div className="preview-grid">
               {imagePreviews.map((image, index) => (
                 <img key={index} src={image.src} alt={`preview-${index}`} />
               ))}
+            </div>
+            <div className="video-upload">
+              <h4>Project Demo Video (optional)</h4>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+                disabled={saving}
+              />
+              {videoFile && <p>{videoFile.name}</p>}
             </div>
           </section>
 
@@ -152,6 +173,7 @@ const UploadProjectPage = () => {
                   className={techStack.includes(item) ? "active" : ""}
                   onClick={() => toggleStack(item)}
                   type="button"
+                  disabled={saving}
                 >
                   {item}
                 </button>

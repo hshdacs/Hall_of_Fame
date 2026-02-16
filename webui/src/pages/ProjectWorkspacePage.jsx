@@ -32,7 +32,7 @@ const ProjectWorkspacePage = () => {
     if (project?.images?.length) return project.images;
     return [];
   }, [project]);
-  const isRunning = project.status === "running";
+  const isRunning = project?.status === "running";
 
   const callRunStop = async (type) => {
     const token = getToken();
@@ -106,6 +106,16 @@ const ProjectWorkspacePage = () => {
             <h3>Project Overview</h3>
             <p>{project.longDescription || "No description provided."}</p>
           </article>
+
+          {project.demoVideo && (
+            <article className="workspace-section">
+              <h3>Demo Video</h3>
+              <video controls style={{ width: "100%", borderRadius: "10px" }}>
+                <source src={project.demoVideo} />
+                Your browser does not support embedded video playback.
+              </video>
+            </article>
+          )}
 
           <article className="workspace-section">
             <h3>Tech Stack</h3>
