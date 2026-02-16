@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { register, login } = require("../controllers/auth.controller");
+const User = require("../db/model/userSchema");
+const { auth, checkRole } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -68,5 +70,21 @@ router.post("/register", register);
  *         description: Invalid credentials
  */
 router.post("/login", login);
+
+router.get(
+  "/users/basic",
+  auth,
+  checkRole(["student", "faculty", "admin"]),
+  async (req, res) => {
+    try {
+      const users = await User.find({ role: "student" })
+        .select("_id name email regNumber course")
+        .sort({ name: 1 });
+      res.json(users);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
 
 module.exports = router;

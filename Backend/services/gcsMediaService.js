@@ -79,6 +79,10 @@ async function materializeProjectMedia(projectDoc) {
   if (project.demoVideo) {
     project.demoVideo = await getSignedReadUrl(project.demoVideo);
   }
+  const resourceFiles = Array.isArray(project.resourceFiles) ? project.resourceFiles : [];
+  project.resourceFiles = await Promise.all(
+    resourceFiles.map((fileUri) => getSignedReadUrl(fileUri))
+  );
   return project;
 }
 

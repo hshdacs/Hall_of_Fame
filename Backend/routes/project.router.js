@@ -5,6 +5,8 @@ const path = require("path");
 const router = express.Router();
 
 const Project = require("../db/model/projectSchema");
+const ProjectRemark = require("../db/model/projectRemarkSchema");
+const ProjectComment = require("../db/model/projectCommentSchema");
 const buildQueue = require("../queue/buildQueue");
 const { runProject } = require("../services/runProject");
 const { stopProject } = require("../services/stopProject");
@@ -120,6 +122,137 @@ router.get("/status/:id", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/project/{id}/remarks:
+ *   get:
+ *     summary: List project remarks
+ *     tags: [Projects]
+ */
+router.get(
+  "/:id/remarks",
+  auth,
+  checkRole(["student", "faculty", "admin"]),
+  async (req, res) => {
+    try {
+      const project = await Project.findById(req.params.id).select("ownerUserId");
+      if (!project) return res.status(404).json({ error: "Project not found" });
+
+      const isOwner =
+        project.ownerUserId &&
+        String(project.ownerUserId) === String(req.user.id);
+      const isTeacher = req.user.role === "faculty" || req.user.role === "admin";
+
+      if (!isTeacher && !isOwner) {
+        return res.status(403).json({ error: "Only project owner can view remarks" });
+      }
+
+      const query = { projectId: req.params.id };
+      if (!isTeacher) query.isPublished = true;
+
+      const remarks = await ProjectRemark.find(query).sort({ createdAt: -1 });
+      res.json(remarks);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+router.post(
+  "/:id/remarks",
+  auth,
+  checkRole(["faculty", "admin"]),
+  async (req, res) => {
+    try {
+      const { remark, isPublished } = req.body;
+      if (!remark?.trim()) {
+        return res.status(400).json({ error: "Remark is required" });
+      }
+
+      const project = await Project.findById(req.params.id).select("_id");
+      if (!project) return res.status(404).json({ error: "Project not found" });
+
+      const saved = await ProjectRemark.create({
+        projectId: project._id,
+        teacherUserId: req.user.id,
+        teacherName: req.user.name || req.user.email || "Teacher",
+        teacherRole: req.user.role,
+        remark: remark.trim(),
+        isPublished: Boolean(isPublished),
+      });
+
+      res.status(201).json(saved);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+router.patch(
+  "/remarks/:remarkId/publish",
+  auth,
+  checkRole(["faculty", "admin"]),
+  async (req, res) => {
+    try {
+      const { isPublished } = req.body;
+      const remark = await ProjectRemark.findById(req.params.remarkId);
+      if (!remark) return res.status(404).json({ error: "Remark not found" });
+
+      const isCreator = String(remark.teacherUserId) === String(req.user.id);
+      if (req.user.role !== "admin" && !isCreator) {
+        return res.status(403).json({ error: "Only remark creator/admin can publish" });
+      }
+
+      remark.isPublished = Boolean(isPublished);
+      await remark.save();
+
+      res.json(remark);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+router.get("/:id/comments", async (req, res) => {
+  try {
+    const comments = await ProjectComment.find({ projectId: req.params.id }).sort({
+      createdAt: -1,
+    });
+    res.json(comments);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post(
+  "/:id/comments",
+  auth,
+  checkRole(["viewer", "student", "faculty", "admin"]),
+  async (req, res) => {
+    try {
+      const { comment } = req.body;
+      if (!comment?.trim()) {
+        return res.status(400).json({ error: "Comment is required" });
+      }
+
+      const project = await Project.findById(req.params.id).select("_id");
+      if (!project) return res.status(404).json({ error: "Project not found" });
+
+      const saved = await ProjectComment.create({
+        projectId: project._id,
+        authorUserId: req.user.id,
+        authorName: req.user.name || req.user.email || "User",
+        authorRole: req.user.role,
+        comment: comment.trim(),
+      });
+
+      res.status(201).json(saved);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 
 /* =====================================================
    2️⃣ STUDENT + FACULTY + ADMIN
@@ -164,6 +297,7 @@ router.post(
     { name: "file", maxCount: 1 },
     { name: "projectImages", maxCount: 12 },
     { name: "projectVideo", maxCount: 1 },
+    { name: "resourceDocs", maxCount: 12 },
   ]),
   async (req, res) => {
     try {
@@ -184,6 +318,9 @@ router.post(
         projectTag,
         projectTitle,
         description,
+        documentation,
+        resourceLinks,
+        teamMembers,
         githubUrl,
         technologiesUsed
       } = req.body;
@@ -191,6 +328,7 @@ router.post(
       const zipFile = req.files?.file?.[0];
       const imageFiles = req.files?.projectImages || [];
       const videoFile = req.files?.projectVideo?.[0];
+      const resourceDocFiles = req.files?.resourceDocs || [];
       let sourceType, sourcePathOrUrl;
       const normalizedGithubUrl = githubUrl?.trim();
 
@@ -247,8 +385,67 @@ router.post(
         }
       }
 
+      const resourceFileUrls = [];
+      for (const file of resourceDocFiles) {
+        if (useGcs) {
+          const objectName = `projects/${tokenProfile.course?.toLowerCase?.() || "general"}/${req.user.id}/resources/${Date.now()}-${file.originalname}`;
+          const gcsUri = await uploadFileToGcs(file.path, objectName, file.mimetype);
+          resourceFileUrls.push(gcsUri);
+        } else {
+          const normalized = file.path.replace(/\\/g, "/");
+          const relativePath = normalized.startsWith("uploads/")
+            ? normalized.slice("uploads/".length)
+            : path.basename(normalized);
+          resourceFileUrls.push(`${req.protocol}://${req.get("host")}/uploads/${relativePath}`);
+        }
+      }
+
+      let parsedTeamMembers = [];
+      if (teamMembers) {
+        try {
+          const parsed = JSON.parse(teamMembers);
+          if (Array.isArray(parsed)) {
+            parsedTeamMembers = parsed
+              .filter((m) => m && (m.email || m.name))
+              .map((m) => ({
+                userId: m.userId || undefined,
+                name: m.name || "",
+                email: m.email || "",
+                regNumber: m.regNumber || "",
+                course: m.course || "",
+              }));
+          }
+        } catch (_err) {
+          return res.status(400).json({ error: "Invalid teamMembers format" });
+        }
+      }
+
+      const parsedResourceLinks = (resourceLinks || "")
+        .split(/\r?\n|,/)
+        .map((link) => link.trim())
+        .filter(Boolean);
+
+      const ownerIncluded = parsedTeamMembers.some(
+        (member) =>
+          member.email &&
+          String(member.email).toLowerCase() === String(req.user.email || "").toLowerCase()
+      );
+      if (!ownerIncluded) {
+        parsedTeamMembers.unshift({
+          userId: req.user.id,
+          name: tokenProfile.studentName,
+          email: req.user.email || "",
+          regNumber: tokenProfile.regNumber || "",
+          course: tokenProfile.course || "",
+        });
+      }
+
       if (useGcs) {
-        for (const mediaFile of [...imageFiles, ...(videoFile ? [videoFile] : [])]) {
+        for (const mediaFile of [
+          ...imageFiles,
+          ...(videoFile ? [videoFile] : []),
+          ...resourceDocFiles,
+        ]) {
           if (mediaFile.path && fs.existsSync(mediaFile.path)) {
             fs.unlinkSync(mediaFile.path);
           }
@@ -263,6 +460,10 @@ router.post(
         projectTag: projectTag?.trim() || "General",
         projectTitle,
         longDescription: description,
+        documentation: documentation?.trim() || "",
+        teamMembers: parsedTeamMembers,
+        resourceLinks: parsedResourceLinks,
+        resourceFiles: resourceFileUrls,
         technologiesUsed: technologiesUsed
           ? technologiesUsed.split(",").map((tech) => tech.trim()).filter(Boolean)
           : [],
@@ -291,6 +492,7 @@ router.post(
         ...(req.files?.file || []),
         ...(req.files?.projectImages || []),
         ...(req.files?.projectVideo || []),
+        ...(req.files?.resourceDocs || []),
       ];
       for (const file of allFiles) {
         if (file.path && fs.existsSync(file.path)) {

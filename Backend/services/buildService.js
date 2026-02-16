@@ -131,10 +131,15 @@ const path = require("path");
 const simpleGit = require("simple-git");
 const unzipper = require("unzipper");
 const { spawn } = require("child_process");
-const getPort = require("get-port");
+const getPortPkg = require("get-port");
 
 const Project = require("../db/model/projectSchema");
 const { resolveProjectRoot } = require("./projectSourceResolver");
+
+const getPort = getPortPkg.default || getPortPkg;
+const portNumbers =
+  getPortPkg.portNumbers ||
+  ((from, to) => Array.from({ length: to - from + 1 }, (_, i) => from + i));
 
 function runCommandStream(command, { cwd, onOutput }) {
   return new Promise((resolve, reject) => {
@@ -268,7 +273,7 @@ async function buildAndDeployProject(
 
       const internalPort = 80;
       const hostPort = await getPort({
-        port: getPort.makeRange(8000, 9999),
+        port: portNumbers(8000, 9999),
       });
 
       project.logs.deploy += "✅ Image build complete. Project is ready to start.\n";

@@ -33,11 +33,16 @@
 
 const Project = require("../db/model/projectSchema");
 const { execSync } = require("child_process");
-const getPort = require("get-port");
+const getPortPkg = require("get-port");
 const fs = require("fs");
 const path = require("path");
 const yaml = require("js-yaml");
 const { resolveProjectRoot } = require("./projectSourceResolver");
+
+const getPort = getPortPkg.default || getPortPkg;
+const portNumbers =
+  getPortPkg.portNumbers ||
+  ((from, to) => Array.from({ length: to - from + 1 }, (_, i) => from + i));
 
 async function runProject(projectId, startedByRole = "system") {
   const project = await Project.findById(projectId);
@@ -141,7 +146,7 @@ if (composeFile && fs.existsSync(composeFile)) {
   // CASE 2: Dockerfile project (single container)
   // -----------------------------------------------------------
   try {
-    const hostPort = await getPort({ port: getPort.makeRange(8000, 9999) });
+    const hostPort = await getPort({ port: portNumbers(8000, 9999) });
 
     // Remove old container (ignore errors)
     try { execSync(`docker rm -f ${project.containerName}`, { stdio: "ignore" }); } catch {}

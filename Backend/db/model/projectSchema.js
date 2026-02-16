@@ -62,6 +62,18 @@ const projectSchema = new mongoose.Schema({
   images: [{ type: String }],
   demoVideo: { type: String },
   technologiesUsed: [{ type: String }],
+  documentation: { type: String },
+  teamMembers: [
+    {
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      name: { type: String },
+      email: { type: String },
+      regNumber: { type: String },
+      course: { type: String },
+    },
+  ],
+  resourceLinks: [{ type: String }],
+  resourceFiles: [{ type: String }],
 
   // 🧩 Build History
   buildHistory: [
