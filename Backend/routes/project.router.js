@@ -17,6 +17,28 @@ const { gcsEnabled, uploadFileToGcs, materializeProjectMedia } = require("../ser
 const { auth, checkRole } = require("../middleware/authMiddleware");
 const upload = multer({ dest: "uploads/" });
 
+const isValidGithubRepoUrl = (value) => {
+  if (!value) return false;
+  try {
+    const parsed = new URL(String(value).trim());
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    if (!["http:", "https:"].includes(parsed.protocol) || host !== "github.com") {
+      return false;
+    }
+    if (parsed.search || parsed.hash) return false;
+
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    if (segments.length !== 2) return false;
+
+    const [owner, rawRepo] = segments;
+    const repo = rawRepo.endsWith(".git") ? rawRepo.slice(0, -4) : rawRepo;
+    const partRegex = /^[A-Za-z0-9._-]+$/;
+    return Boolean(owner && repo && partRegex.test(owner) && partRegex.test(repo));
+  } catch (_err) {
+    return false;
+  }
+};
+
 /**
  * @swagger
  * tags:
@@ -46,7 +68,9 @@ const upload = multer({ dest: "uploads/" });
  *                 $ref: "#/components/schemas/Project"
  */
 router.get("/all", async (req, res) => {
-  const projects = await Project.find().sort({ createdDate: -1 });
+  const projects = await Project.find({
+    status: { $in: ["ready", "running", "stopped"] },
+  }).sort({ createdDate: -1 });
   const withMediaUrls = await Promise.all(projects.map((project) => materializeProjectMedia(project)));
   res.json(withMediaUrls);
 });
@@ -335,6 +359,12 @@ router.post(
       if (normalizedGithubUrl && zipFile) {
         return res.status(400).json({
           message: "Provide either GitHub URL or ZIP file, not both",
+        });
+      }
+
+      if (normalizedGithubUrl && !isValidGithubRepoUrl(normalizedGithubUrl)) {
+        return res.status(400).json({
+          message: "Invalid GitHub URL. Use format: https://github.com/owner/repo",
         });
       }
 
