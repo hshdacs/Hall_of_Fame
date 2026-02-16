@@ -10,6 +10,7 @@ const { runProject } = require("../services/runProject");
 const { stopProject } = require("../services/stopProject");
 const { getProjectServices } = require("../services/projectStatus");
 const { enforceUploadQuota, enforceRunQuota } = require("../services/quotaService");
+const { gcsEnabled, uploadFileToGcs, materializeProjectMedia } = require("../services/gcsMediaService");
 
 const { auth, checkRole } = require("../middleware/authMiddleware");
 const upload = multer({ dest: "uploads/" });
@@ -44,7 +45,8 @@ const upload = multer({ dest: "uploads/" });
  */
 router.get("/all", async (req, res) => {
   const projects = await Project.find().sort({ createdDate: -1 });
-  res.json(projects);
+  const withMediaUrls = await Promise.all(projects.map((project) => materializeProjectMedia(project)));
+  res.json(withMediaUrls);
 });
 
 
@@ -74,7 +76,8 @@ router.get("/all", async (req, res) => {
 router.get("/details/:id", async (req, res) => {
   const project = await Project.findById(req.params.id);
   if (!project) return res.status(404).json({ message: "Project not found" });
-  res.json(project);
+  const withMediaUrls = await materializeProjectMedia(project);
+  res.json(withMediaUrls);
 });
 
 
@@ -160,6 +163,7 @@ router.post(
   upload.fields([
     { name: "file", maxCount: 1 },
     { name: "projectImages", maxCount: 12 },
+    { name: "projectVideo", maxCount: 1 },
   ]),
   async (req, res) => {
     try {
@@ -186,6 +190,7 @@ router.post(
 
       const zipFile = req.files?.file?.[0];
       const imageFiles = req.files?.projectImages || [];
+      const videoFile = req.files?.projectVideo?.[0];
       let sourceType, sourcePathOrUrl;
       const normalizedGithubUrl = githubUrl?.trim();
 
@@ -212,13 +217,43 @@ router.post(
         zipSizeBytes: zipFile?.size || 0,
       });
 
-      const imageUrls = imageFiles.map((file) => {
-        const normalized = file.path.replace(/\\/g, "/");
-        const relativePath = normalized.startsWith("uploads/")
-          ? normalized.slice("uploads/".length)
-          : path.basename(normalized);
-        return `${req.protocol}://${req.get("host")}/uploads/${relativePath}`;
-      });
+      const useGcs = gcsEnabled();
+      const imageUrls = [];
+      for (const file of imageFiles) {
+        if (useGcs) {
+          const objectName = `projects/${tokenProfile.course?.toLowerCase?.() || "general"}/${req.user.id}/${Date.now()}-${file.originalname}`;
+          const gcsUri = await uploadFileToGcs(file.path, objectName, file.mimetype);
+          imageUrls.push(gcsUri);
+        } else {
+          const normalized = file.path.replace(/\\/g, "/");
+          const relativePath = normalized.startsWith("uploads/")
+            ? normalized.slice("uploads/".length)
+            : path.basename(normalized);
+          imageUrls.push(`${req.protocol}://${req.get("host")}/uploads/${relativePath}`);
+        }
+      }
+
+      let demoVideo = "";
+      if (videoFile) {
+        if (useGcs) {
+          const objectName = `projects/${tokenProfile.course?.toLowerCase?.() || "general"}/${req.user.id}/${Date.now()}-${videoFile.originalname}`;
+          demoVideo = await uploadFileToGcs(videoFile.path, objectName, videoFile.mimetype);
+        } else {
+          const normalized = videoFile.path.replace(/\\/g, "/");
+          const relativePath = normalized.startsWith("uploads/")
+            ? normalized.slice("uploads/".length)
+            : path.basename(normalized);
+          demoVideo = `${req.protocol}://${req.get("host")}/uploads/${relativePath}`;
+        }
+      }
+
+      if (useGcs) {
+        for (const mediaFile of [...imageFiles, ...(videoFile ? [videoFile] : [])]) {
+          if (mediaFile.path && fs.existsSync(mediaFile.path)) {
+            fs.unlinkSync(mediaFile.path);
+          }
+        }
+      }
 
       const project = await Project.create({
         studentName: tokenProfile.studentName,
@@ -236,6 +271,7 @@ router.post(
         sourceType,
         sourcePathOrUrl,
         images: imageUrls,
+        demoVideo,
         status: "queued",
         createdDate: new Date()
       });
@@ -254,6 +290,7 @@ router.post(
       const allFiles = [
         ...(req.files?.file || []),
         ...(req.files?.projectImages || []),
+        ...(req.files?.projectVideo || []),
       ];
       for (const file of allFiles) {
         if (file.path && fs.existsSync(file.path)) {
@@ -302,9 +339,23 @@ router.post(
 router.post(
   "/run/:id",
   auth,
-  checkRole(["faculty", "admin"]),
+  checkRole(["student", "faculty", "admin"]),
   async (req, res) => {
     try {
+      const project = await Project.findById(req.params.id).select("ownerUserId");
+      if (!project) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+
+      const isOwner =
+        project.ownerUserId &&
+        String(project.ownerUserId) === String(req.user.id);
+      const canManage = req.user.role === "admin" || req.user.role === "faculty" || isOwner;
+
+      if (!canManage) {
+        return res.status(403).json({ error: "You can only start your own project" });
+      }
+
       await enforceRunQuota({
         projectId: req.params.id,
         role: req.user.role,
@@ -345,9 +396,23 @@ router.post(
 router.post(
   "/stop/:id",
   auth,
-  checkRole(["faculty", "admin"]),
+  checkRole(["student", "faculty", "admin"]),
   async (req, res) => {
     try {
+      const project = await Project.findById(req.params.id).select("ownerUserId");
+      if (!project) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+
+      const isOwner =
+        project.ownerUserId &&
+        String(project.ownerUserId) === String(req.user.id);
+      const canManage = req.user.role === "admin" || req.user.role === "faculty" || isOwner;
+
+      if (!canManage) {
+        return res.status(403).json({ error: "You can only stop your own project" });
+      }
+
       await stopProject(req.params.id);
       res.json({ message: "Project stopped" });
     } catch (err) {

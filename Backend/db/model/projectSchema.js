@@ -60,6 +60,7 @@ const projectSchema = new mongoose.Schema({
 
   // 🧠 Image carousel for frontend
   images: [{ type: String }],
+  demoVideo: { type: String },
   technologiesUsed: [{ type: String }],
 
   // 🧩 Build History
