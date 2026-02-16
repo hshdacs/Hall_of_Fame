@@ -42,11 +42,35 @@ const PROJECT_TAGS = [
 ];
 
 const UPLOAD_DRAFT_KEY = "hof_upload_project_draft_v1";
+const UPLOAD_DRAFT_TTL_MS = 3 * 60 * 1000;
+const MAX_ZIP_SIZE_BYTES = 200 * 1024 * 1024;
+const MAX_IMAGE_COUNT = 12;
+const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_VIDEO_SIZE_BYTES = 300 * 1024 * 1024;
+const MAX_RESOURCE_DOC_COUNT = 12;
+const MAX_RESOURCE_DOC_SIZE_BYTES = 20 * 1024 * 1024;
+const ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"];
+const ALLOWED_VIDEO_EXTENSIONS = ["mp4", "webm", "ogg", "mov", "m4v"];
+const ALLOWED_RESOURCE_EXTENSIONS = ["pdf", "doc", "docx", "txt"];
 
 const readUploadDraft = () => {
   try {
     const raw = localStorage.getItem(UPLOAD_DRAFT_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed) return null;
+
+    // Backward compatibility with older draft shape.
+    const savedAt = parsed.savedAt;
+    const draft = parsed.draft || parsed;
+
+    if (!savedAt || Date.now() - savedAt > UPLOAD_DRAFT_TTL_MS) {
+      localStorage.removeItem(UPLOAD_DRAFT_KEY);
+      return null;
+    }
+
+    return draft;
   } catch (_err) {
     return null;
   }
@@ -72,6 +96,19 @@ const isValidGithubRepoUrl = (value) => {
   } catch (_err) {
     return false;
   }
+};
+
+const getFileExtension = (fileName) => {
+  const name = String(fileName || "");
+  const idx = name.lastIndexOf(".");
+  return idx >= 0 ? name.slice(idx + 1).toLowerCase() : "";
+};
+
+const formatBytes = (bytes) => {
+  if (!Number.isFinite(bytes) || bytes < 0) return "0 B";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
 const UploadProjectPage = () => {
@@ -103,6 +140,12 @@ const UploadProjectPage = () => {
   const [teammates, setTeammates] = useState([]);
   const [selectedTeammateEmail, setSelectedTeammateEmail] = useState("");
   const [techStack, setTechStack] = useState([]);
+  const [fileErrors, setFileErrors] = useState({
+    zip: [],
+    images: [],
+    video: [],
+    resourceDocs: [],
+  });
   const [saving, setSaving] = useState(false);
   const hydratedRef = useRef(false);
 
@@ -119,6 +162,18 @@ const UploadProjectPage = () => {
         .filter(Boolean),
     [resourceLinksText]
   );
+
+  const profileCourse = String(profile.course || "").trim().toUpperCase();
+  const profileBatch = String(profile.batch || "").trim();
+  const teammateCandidates = useMemo(() => {
+    return students.filter((student) => {
+      const sameEmail =
+        String(student.email || "").toLowerCase() === String(profile.email || "").toLowerCase();
+      const sameCourse = String(student.course || "").toUpperCase() === profileCourse;
+      const sameBatch = !profileBatch || String(student.batch || "") === profileBatch;
+      return !sameEmail && sameCourse && sameBatch;
+    });
+  }, [students, profile.email, profileBatch, profileCourse]);
 
   useEffect(() => {
     return () => {
@@ -194,7 +249,13 @@ const UploadProjectPage = () => {
       teammates,
       techStack,
     };
-    localStorage.setItem(UPLOAD_DRAFT_KEY, JSON.stringify(draft));
+    localStorage.setItem(
+      UPLOAD_DRAFT_KEY,
+      JSON.stringify({
+        savedAt: Date.now(),
+        draft,
+      })
+    );
   }, [
     step,
     form,
@@ -214,26 +275,128 @@ const UploadProjectPage = () => {
 
   const handleZipChange = (e) => {
     const file = e.target.files?.[0] || null;
+    const nextErrors = [];
+
+    if (file) {
+      const ext = getFileExtension(file.name);
+      if (ext !== "zip") {
+        nextErrors.push(`${file.name}: only .zip file is allowed.`);
+      }
+      if (file.size > MAX_ZIP_SIZE_BYTES) {
+        nextErrors.push(
+          `${file.name}: exceeds ${formatBytes(MAX_ZIP_SIZE_BYTES)} (selected ${formatBytes(
+            file.size
+          )}).`
+        );
+      }
+    }
+
+    setFileErrors((prev) => ({ ...prev, zip: nextErrors }));
+    if (nextErrors.length > 0) {
+      setZipFile(null);
+      setZipFileName("");
+      return;
+    }
     setZipFile(file);
     setZipFileName(file?.name || "");
   };
 
   const handleImagesChange = (e) => {
     const files = Array.from(e.target.files || []);
-    setImages(files);
-    setImageFileNames(files.map((file) => file.name));
+    const nextErrors = [];
+    const validFiles = [];
+
+    if (files.length > MAX_IMAGE_COUNT) {
+      nextErrors.push(`Only ${MAX_IMAGE_COUNT} images are allowed. Keeping first ${MAX_IMAGE_COUNT}.`);
+    }
+
+    files.slice(0, MAX_IMAGE_COUNT).forEach((file) => {
+      const ext = getFileExtension(file.name);
+      if (!ALLOWED_IMAGE_EXTENSIONS.includes(ext)) {
+        nextErrors.push(`${file.name}: unsupported image type.`);
+        return;
+      }
+      if (!String(file.type || "").startsWith("image/")) {
+        nextErrors.push(`${file.name}: invalid image MIME type.`);
+        return;
+      }
+      if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        nextErrors.push(
+          `${file.name}: exceeds ${formatBytes(MAX_IMAGE_SIZE_BYTES)} (selected ${formatBytes(
+            file.size
+          )}).`
+        );
+        return;
+      }
+      validFiles.push(file);
+    });
+
+    setFileErrors((prev) => ({ ...prev, images: nextErrors }));
+    setImages(validFiles);
+    setImageFileNames(validFiles.map((file) => file.name));
   };
 
   const handleVideoChange = (e) => {
     const file = e.target.files?.[0] || null;
+    const nextErrors = [];
+    if (file) {
+      const ext = getFileExtension(file.name);
+      if (!ALLOWED_VIDEO_EXTENSIONS.includes(ext)) {
+        nextErrors.push(`${file.name}: unsupported video type.`);
+      }
+      if (!String(file.type || "").startsWith("video/")) {
+        nextErrors.push(`${file.name}: invalid video MIME type.`);
+      }
+      if (file.size > MAX_VIDEO_SIZE_BYTES) {
+        nextErrors.push(
+          `${file.name}: exceeds ${formatBytes(MAX_VIDEO_SIZE_BYTES)} (selected ${formatBytes(
+            file.size
+          )}).`
+        );
+      }
+    }
+
+    setFileErrors((prev) => ({ ...prev, video: nextErrors }));
+    if (nextErrors.length > 0) {
+      setVideoFile(null);
+      setVideoFileName("");
+      return;
+    }
     setVideoFile(file);
     setVideoFileName(file?.name || "");
   };
 
   const handleResourceDocsChange = (e) => {
     const files = Array.from(e.target.files || []);
-    setResourceDocs(files);
-    setResourceDocNames(files.map((file) => file.name));
+    const nextErrors = [];
+    const validFiles = [];
+
+    if (files.length > MAX_RESOURCE_DOC_COUNT) {
+      nextErrors.push(
+        `Only ${MAX_RESOURCE_DOC_COUNT} resource files are allowed. Keeping first ${MAX_RESOURCE_DOC_COUNT}.`
+      );
+    }
+
+    files.slice(0, MAX_RESOURCE_DOC_COUNT).forEach((file) => {
+      const ext = getFileExtension(file.name);
+      if (!ALLOWED_RESOURCE_EXTENSIONS.includes(ext)) {
+        nextErrors.push(`${file.name}: only ${ALLOWED_RESOURCE_EXTENSIONS.join(", ")} are allowed.`);
+        return;
+      }
+      if (file.size > MAX_RESOURCE_DOC_SIZE_BYTES) {
+        nextErrors.push(
+          `${file.name}: exceeds ${formatBytes(MAX_RESOURCE_DOC_SIZE_BYTES)} (selected ${formatBytes(
+            file.size
+          )}).`
+        );
+        return;
+      }
+      validFiles.push(file);
+    });
+
+    setFileErrors((prev) => ({ ...prev, resourceDocs: nextErrors }));
+    setResourceDocs(validFiles);
+    setResourceDocNames(validFiles.map((file) => file.name));
   };
 
   const toggleStack = (item) => {
@@ -245,11 +408,32 @@ const UploadProjectPage = () => {
   const addTeammateByEmail = () => {
     if (!selectedTeammateEmail) return;
     const match = students.find((s) => s.email === selectedTeammateEmail);
-    if (!match) return;
+    if (!match) {
+      toast("Selected teammate not found.", "error");
+      return;
+    }
     const alreadyAdded = teammates.some((t) => t.email === match.email);
     const isSelf =
       String(match.email).toLowerCase() === String(profile.email || "").toLowerCase();
-    if (alreadyAdded || isSelf) return;
+    if (alreadyAdded) {
+      toast("Teammate already added.", "error");
+      return;
+    }
+    if (isSelf) {
+      toast("You are already included as project owner.", "error");
+      return;
+    }
+
+    const matchCourse = String(match.course || "").trim().toUpperCase();
+    const matchBatch = String(match.batch || "").trim();
+    if (matchCourse !== profileCourse) {
+      toast(`Teammate must be from course ${profileCourse}.`, "error");
+      return;
+    }
+    if (profileBatch && matchBatch !== profileBatch) {
+      toast(`Teammate must be from batch ${profileBatch}.`, "error");
+      return;
+    }
 
     setTeammates((prev) => [
       ...prev,
@@ -258,6 +442,7 @@ const UploadProjectPage = () => {
         name: match.name || "",
         email: match.email || "",
         regNumber: match.regNumber || "",
+        batch: match.batch || "",
         course: match.course || "",
       },
     ]);
@@ -291,6 +476,11 @@ const UploadProjectPage = () => {
     }
     if (techStack.length === 0) {
       toast("Select at least one technology.", "error");
+      return false;
+    }
+    const hasFileErrors = Object.values(fileErrors).some((errs) => errs.length > 0);
+    if (hasFileErrors) {
+      toast("Fix file validation errors before continuing.", "error");
       return false;
     }
     return true;
@@ -471,6 +661,13 @@ const UploadProjectPage = () => {
                     disabled={saving}
                   />
                   {zipFileName && <p className="comment-empty">Selected ZIP: {zipFileName}</p>}
+                  {fileErrors.zip.length > 0 && (
+                    <ul className="input-errors full">
+                      {fileErrors.zip.map((err) => (
+                        <li key={err}>{err}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </section>
 
@@ -483,9 +680,9 @@ const UploadProjectPage = () => {
                     disabled={saving}
                   >
                     <option value="">Select teammate</option>
-                    {students.map((student) => (
+                    {teammateCandidates.map((student) => (
                       <option key={student._id} value={student.email}>
-                        {student.name} ({student.email})
+                        {student.name} ({student.email}) - {student.course} {student.batch || ""}
                       </option>
                     ))}
                   </select>
@@ -493,12 +690,15 @@ const UploadProjectPage = () => {
                     Add Teammate
                   </button>
                 </div>
+                <p className="team-helper">
+                  Only students from your course ({profileCourse || "N/A"}) and batch ({profileBatch || "N/A"}) are listed.
+                </p>
                 <div className="team-list">
                   {teammates.length === 0 && <p>No teammates added (solo by default).</p>}
                   {teammates.map((member) => (
                     <div key={member.email} className="team-item">
                       <span>
-                        {member.name} - {member.email}
+                        {member.name} - {member.email} ({member.course || "N/A"} {member.batch || ""})
                       </span>
                       <button
                         type="button"
@@ -543,6 +743,13 @@ const UploadProjectPage = () => {
                   onChange={handleImagesChange}
                   disabled={saving}
                 />
+                {fileErrors.images.length > 0 && (
+                  <ul className="input-errors">
+                    {fileErrors.images.map((err) => (
+                      <li key={err}>{err}</li>
+                    ))}
+                  </ul>
+                )}
                 <div className="preview-grid">
                   {imagePreviews.map((image, index) => (
                     <img key={index} src={image.src} alt={`preview-${index}`} />
@@ -560,6 +767,13 @@ const UploadProjectPage = () => {
                     onChange={handleVideoChange}
                     disabled={saving}
                   />
+                  {fileErrors.video.length > 0 && (
+                    <ul className="input-errors">
+                      {fileErrors.video.map((err) => (
+                        <li key={err}>{err}</li>
+                      ))}
+                    </ul>
+                  )}
                   {(videoFile?.name || videoFileName) && <p>{videoFile?.name || videoFileName}</p>}
                 </div>
               </section>
@@ -593,6 +807,13 @@ const UploadProjectPage = () => {
                     onChange={handleResourceDocsChange}
                     disabled={saving}
                   />
+                  {fileErrors.resourceDocs.length > 0 && (
+                    <ul className="input-errors">
+                      {fileErrors.resourceDocs.map((err) => (
+                        <li key={err}>{err}</li>
+                      ))}
+                    </ul>
+                  )}
                   {(resourceDocs.length > 0 || resourceDocNames.length > 0) && (
                     <ul>
                       {(resourceDocs.length > 0
@@ -645,7 +866,7 @@ const UploadProjectPage = () => {
                     <ul>
                       {teammates.map((member) => (
                         <li key={member.email}>
-                          {member.name} ({member.email})
+                          {member.name} ({member.email}) - {member.course || "N/A"} {member.batch || ""}
                         </li>
                       ))}
                     </ul>

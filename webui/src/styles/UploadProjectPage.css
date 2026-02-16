@@ -252,6 +252,12 @@
   color: #607a90;
 }
 
+.team-helper {
+  margin: 8px 0 0;
+  color: #607a90;
+  font-size: 13px;
+}
+
 .team-item {
   border: 1px solid #d7e2ee;
   border-radius: 9px;
@@ -298,6 +304,17 @@
   margin: 8px 0 0;
   padding-left: 18px;
   color: #607a90;
+}
+
+.input-errors {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: #b42318;
+  font-size: 13px;
+}
+
+.input-errors li {
+  margin-bottom: 4px;
 }
 
 .stack-pick {

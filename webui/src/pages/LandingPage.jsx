@@ -7,6 +7,17 @@ import "../styles/LandingPage.css";
 
 const VISIBLE_PROJECT_STATUSES = new Set(["ready", "running", "stopped"]);
 
+const getTeamSummary = (project) => {
+  const members = Array.isArray(project?.teamMembers) ? project.teamMembers : [];
+  const names = members
+    .map((member) => String(member?.name || "").trim())
+    .filter(Boolean);
+  const uniqueNames = [...new Set(names)];
+  if (uniqueNames.length === 0) return `Team: ${project?.studentName || "Unknown"}`;
+  if (uniqueNames.length <= 2) return `Team: ${uniqueNames.join(", ")}`;
+  return `Team: ${uniqueNames[0]}, ${uniqueNames[1]} +${uniqueNames.length - 2}`;
+};
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
@@ -120,6 +131,7 @@ const LandingPage = () => {
                 <span>{project.projectTag || "General"}</span>
                 <h3>{project.projectTitle}</h3>
                 <p>{project.studentName || "Unknown Student"}</p>
+                <p>{getTeamSummary(project)}</p>
               </div>
             </article>
           ))}

@@ -79,7 +79,31 @@ const ProjectWorkspacePage = () => {
     String(project.ownerUserId) === String(currentUserId);
   const canSeeEvaluationPanel = canCreateRemarks || isOwnerStudent;
   const canSeeBuildLogs = canCreateRemarks || isOwnerStudent;
-  const teamMembers = Array.isArray(project?.teamMembers) ? project.teamMembers : [];
+  const teamMembers = useMemo(() => {
+    const fromProject = Array.isArray(project?.teamMembers) ? project.teamMembers : [];
+    const deduped = [];
+    const seen = new Set();
+    fromProject.forEach((member) => {
+      const emailKey = String(member?.email || "").toLowerCase().trim();
+      const idKey = String(member?.userId || "").trim();
+      const key = emailKey || idKey || `${member?.name || ""}-${member?.regNumber || ""}`;
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      deduped.push(member);
+    });
+
+    if (deduped.length > 0) return deduped;
+    return [
+      {
+        userId: project?.ownerUserId || "",
+        name: project?.studentName || "Project Owner",
+        email: "",
+        regNumber: project?.regNumber || "",
+        batch: project?.batch || "",
+        course: project?.course || "",
+      },
+    ];
+  }, [project]);
   const resourceLinks = Array.isArray(project?.resourceLinks) ? project.resourceLinks : [];
   const resourceFiles = Array.isArray(project?.resourceFiles) ? project.resourceFiles : [];
 
@@ -263,6 +287,7 @@ const ProjectWorkspacePage = () => {
             <span>{project.studentName || "Unknown"}</span>
             <span>{project.course || "NA"}</span>
             <span>{project.projectTag || "General"}</span>
+            <span>{teamMembers.length > 1 ? `Team ${teamMembers.length}` : "Solo"}</span>
             <span className={`status status-${project.status}`}>{project.status}</span>
           </div>
 
@@ -315,8 +340,11 @@ const ProjectWorkspacePage = () => {
                     <div className="team-list project-team-list">
                       {teamMembers.map((member, index) => (
                         <div key={`${member.email}-${index}`} className="team-item">
-                          <span>
-                            {member.name || "Member"} - {member.email || "N/A"}
+                          <span className="team-item-main">
+                            {member.name || "Member"} {member.email ? `- ${member.email}` : ""}
+                          </span>
+                          <span className="team-item-meta">
+                            {member.regNumber || "NA"} | {member.course || "NA"} | {member.batch || "NA"}
                           </span>
                         </div>
                       ))}
