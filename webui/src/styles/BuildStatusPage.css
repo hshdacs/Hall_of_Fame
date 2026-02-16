@@ -61,6 +61,30 @@
   padding: 8px;
 }
 
+.build-failed-box {
+  margin-bottom: 10px;
+  background: #fff1f1;
+  border: 1px solid #ffcccc;
+  color: #942626;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.build-failed-box button {
+  border: 0;
+  border-radius: 8px;
+  background: #1f5cb8;
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
 .log-box {
   margin-top: 12px;
   border: 1px solid #dce6f1;

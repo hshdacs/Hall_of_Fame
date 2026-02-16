@@ -29,7 +29,7 @@ const SrhNavbar = () => {
           <Link to="/landing">Home</Link>
           <Link to="/projects">Projects</Link>
           <Link to="/upload">Upload</Link>
-          <Link to="/admin/monitoring">Monitor</Link>
+          {role === "admin" && <Link to="/admin/monitoring">Monitor</Link>}
         </nav>
 
         <div className="srh-actions">

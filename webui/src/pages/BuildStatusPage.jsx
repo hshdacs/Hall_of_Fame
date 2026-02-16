@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import SrhNavbar from "../components/SrhNavbar";
 import "../styles/BuildStatusPage.css";
@@ -9,12 +9,15 @@ const POLL_MS = 2500;
 const BuildStatusPage = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const uploadDraft = location.state?.uploadDraft || null;
   const [project, setProject] = useState(null);
   const [error, setError] = useState("");
   const [wsState, setWsState] = useState("connecting");
   const [liveBuildLog, setLiveBuildLog] = useState("");
   const [liveDeployLog, setLiveDeployLog] = useState("");
   const [completed, setCompleted] = useState(false);
+  const [failedReason, setFailedReason] = useState("");
 
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:8031/?projectId=${projectId}`);
@@ -57,6 +60,7 @@ const BuildStatusPage = () => {
 
         if (data.status === "running" || data.status === "ready") {
           setCompleted(true);
+          setFailedReason("");
           return;
         }
 
@@ -65,13 +69,7 @@ const BuildStatusPage = () => {
             data?.logs?.build ||
             data?.buildHistory?.[data.buildHistory.length - 1]?.message ||
             "Build failed";
-          navigate("/upload", {
-            replace: true,
-            state: {
-              buildError: reason,
-              failedProjectId: projectId,
-            },
-          });
+          setFailedReason(reason);
           return;
         }
       } catch (err) {
@@ -102,6 +100,13 @@ const BuildStatusPage = () => {
     return `Current status: ${project.status}`;
   }, [project]);
 
+  const openProjectWithProjectsBack = () => {
+    navigate("/projects", { replace: true });
+    setTimeout(() => {
+      navigate(`/project/${projectId}`);
+    }, 0);
+  };
+
   return (
     <div className="build-status-page">
       <SrhNavbar />
@@ -110,10 +115,28 @@ const BuildStatusPage = () => {
         <p className="status-line">{statusText}</p>
         <p className="ws-line">Live stream: {wsState}</p>
         {error && <p className="build-error">{error}</p>}
+        {failedReason && (
+          <div className="build-failed-box">
+            <span>Build failed. Review logs and update your upload.</span>
+            <button
+              onClick={() =>
+                navigate("/upload", {
+                  state: {
+                    buildError: failedReason,
+                    failedProjectId: projectId,
+                    uploadDraft,
+                  },
+                })
+              }
+            >
+              Back To Upload
+            </button>
+          </div>
+        )}
         {completed && (
           <div className="build-success">
             Build completed successfully.
-            <button onClick={() => navigate(`/project/${projectId}`)}>
+            <button onClick={openProjectWithProjectsBack}>
               Open Project
             </button>
           </div>

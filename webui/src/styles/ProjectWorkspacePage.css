@@ -200,6 +200,45 @@
   cursor: pointer;
 }
 
+.build-logs-history {
+  margin-top: 14px;
+  border-top: 1px solid #e7edf5;
+  padding-top: 12px;
+}
+
+.build-logs-history h3 {
+  margin: 0 0 8px;
+}
+
+.build-logs-history details {
+  border: 1px solid #dce6f1;
+  border-radius: 10px;
+  background: #f9fcff;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.build-logs-history summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #17324f;
+  padding: 10px 12px;
+  background: #eef4fb;
+}
+
+.build-logs-history pre {
+  margin: 0;
+  padding: 12px;
+  min-height: 80px;
+  max-height: 260px;
+  overflow: auto;
+  background: #0d1a2a;
+  color: #d7e6f7;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
 .stack-list {
   display: flex;
   flex-wrap: wrap;

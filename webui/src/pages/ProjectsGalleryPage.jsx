@@ -4,6 +4,8 @@ import axios from "axios";
 import SrhNavbar from "../components/SrhNavbar";
 import "../styles/ProjectsGalleryPage.css";
 
+const VISIBLE_PROJECT_STATUSES = new Set(["ready", "running", "stopped"]);
+
 const ProjectsGalleryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,7 +18,12 @@ const ProjectsGalleryPage = () => {
     const fetchProjects = async () => {
       try {
         const res = await axios.get("http://localhost:8020/api/project/all");
-        setProjects(Array.isArray(res.data) ? res.data : []);
+        const list = Array.isArray(res.data) ? res.data : [];
+        setProjects(
+          list.filter((project) =>
+            VISIBLE_PROJECT_STATUSES.has(String(project?.status || "").toLowerCase())
+          )
+        );
       } catch (_err) {
         setProjects([]);
       }

@@ -78,6 +78,7 @@ const ProjectWorkspacePage = () => {
     project?.ownerUserId &&
     String(project.ownerUserId) === String(currentUserId);
   const canSeeEvaluationPanel = canCreateRemarks || isOwnerStudent;
+  const canSeeBuildLogs = role === "student" || canCreateRemarks;
   const teamMembers = Array.isArray(project?.teamMembers) ? project.teamMembers : [];
   const resourceLinks = Array.isArray(project?.resourceLinks) ? project.resourceLinks : [];
   const resourceFiles = Array.isArray(project?.resourceFiles) ? project.resourceFiles : [];
@@ -244,6 +245,15 @@ const ProjectWorkspacePage = () => {
             >
               Comments
             </button>
+            {canSeeBuildLogs && (
+              <button
+                type="button"
+                className={activePanel === "buildlogs" ? "active" : ""}
+                onClick={() => setActivePanel("buildlogs")}
+              >
+                Build Logs
+              </button>
+            )}
           </nav>
         </aside>
 
@@ -386,6 +396,22 @@ const ProjectWorkspacePage = () => {
                   ) : (
                     <p className="comment-empty">Login to add a comment.</p>
                   )}
+                </article>
+              )}
+
+              {activePanel === "buildlogs" && canSeeBuildLogs && (
+                <article className="workspace-section">
+                  <h3>Build Logs</h3>
+                  <div className="build-logs-history">
+                    <details open>
+                      <summary>Build Log</summary>
+                      <pre>{project?.logs?.build || "No build logs available."}</pre>
+                    </details>
+                    <details>
+                      <summary>Deploy Log</summary>
+                      <pre>{project?.logs?.deploy || "No deploy logs available."}</pre>
+                    </details>
+                  </div>
                 </article>
               )}
             </div>

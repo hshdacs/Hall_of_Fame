@@ -86,6 +86,12 @@
   font-weight: 600;
 }
 
+.step.active {
+  background: #e9f2ff;
+  color: #184d98;
+  border-color: #bcd5f7;
+}
+
 .step.done {
   background: #eef6ff;
   color: #174893;
@@ -137,6 +143,10 @@
 .panel {
   padding: 14px;
   margin-bottom: 12px;
+}
+
+.panel h3 {
+  margin: 0 0 10px;
 }
 
 .grid-two {
@@ -202,6 +212,13 @@
 .video-upload p {
   margin: 8px 0 0;
   color: #607a90;
+}
+
+.field-label {
+  display: inline-block;
+  margin: 0 0 8px;
+  color: #17334f;
+  font-weight: 700;
 }
 
 .team-selector-row {
@@ -310,6 +327,10 @@
   justify-content: flex-end;
 }
 
+.wizard-actions {
+  gap: 8px;
+}
+
 .submit-row button {
   border: 0;
   border-radius: 10px;
@@ -318,6 +339,57 @@
   font-weight: 700;
   cursor: pointer;
   background: linear-gradient(110deg, #df4807, #ff7e41);
+}
+
+.submit-row .btn-secondary {
+  color: #17334f;
+  background: #eff4fb;
+  border: 1px solid #d6e2f0;
+}
+
+.review-top-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.review-top-actions button {
+  border: 1px solid #d5e1ee;
+  border-radius: 9px;
+  background: #f6faff;
+  color: #184d98;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.review-top-actions button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.review-block {
+  border: 1px solid #dde6f2;
+  border-radius: 10px;
+  background: #f9fcff;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.review-block h4 {
+  margin: 0 0 6px;
+  color: #14304d;
+}
+
+.review-block p {
+  margin: 4px 0;
+  color: #395875;
+}
+
+.review-block ul {
+  margin: 6px 0 0 18px;
+  color: #395875;
 }
 
 @media (max-width: 1020px) {
