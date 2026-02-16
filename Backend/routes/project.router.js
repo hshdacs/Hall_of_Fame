@@ -2,11 +2,13 @@ const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
 const router = express.Router();
 
 const Project = require("../db/model/projectSchema");
 const ProjectRemark = require("../db/model/projectRemarkSchema");
 const ProjectComment = require("../db/model/projectCommentSchema");
+const User = require("../db/model/userSchema");
 const buildQueue = require("../queue/buildQueue");
 const { runProject } = require("../services/runProject");
 const { stopProject } = require("../services/stopProject");
@@ -39,6 +41,8 @@ const isValidGithubRepoUrl = (value) => {
   }
 };
 
+const normalizeUpper = (value) => String(value || "").trim().toUpperCase();
+
 /**
  * @swagger
  * tags:
@@ -68,11 +72,43 @@ const isValidGithubRepoUrl = (value) => {
  *                 $ref: "#/components/schemas/Project"
  */
 router.get("/all", async (req, res) => {
-  const projects = await Project.find({
-    status: { $in: ["ready", "running", "stopped"] },
-  }).sort({ createdDate: -1 });
-  const withMediaUrls = await Promise.all(projects.map((project) => materializeProjectMedia(project)));
-  res.json(withMediaUrls);
+  try {
+    const query = { status: { $in: ["ready", "running", "stopped"] } };
+    const pageRaw = Number.parseInt(req.query.page, 10);
+    const limitRaw = Number.parseInt(req.query.limit, 10);
+    const hasPagination = Number.isFinite(pageRaw) || Number.isFinite(limitRaw);
+
+    if (!hasPagination) {
+      const projects = await Project.find(query).sort({ createdDate: -1 });
+      const withMediaUrls = await Promise.all(
+        projects.map((project) => materializeProjectMedia(project))
+      );
+      return res.json(withMediaUrls);
+    }
+
+    const page = Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1;
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 50) : 12;
+    const total = await Project.countDocuments(query);
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
+    const projects = await Project.find(query)
+      .sort({ createdDate: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const items = await Promise.all(projects.map((project) => materializeProjectMedia(project)));
+    return res.json({
+      items,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 
@@ -436,12 +472,13 @@ router.post(
           const parsed = JSON.parse(teamMembers);
           if (Array.isArray(parsed)) {
             parsedTeamMembers = parsed
-              .filter((m) => m && (m.email || m.name))
+              .filter((m) => m && (m.email || m.userId))
               .map((m) => ({
                 userId: m.userId || undefined,
                 name: m.name || "",
                 email: m.email || "",
                 regNumber: m.regNumber || "",
+                batch: m.batch || "",
                 course: m.course || "",
               }));
           }
@@ -450,22 +487,93 @@ router.post(
         }
       }
 
+      const uploaderCourse = normalizeUpper(tokenProfile.course);
+      const uploaderBatch = String(tokenProfile.batch || "").trim();
+      const seenKeys = new Set();
+      const lookupOr = [];
+      parsedTeamMembers.forEach((member) => {
+        const emailKey = String(member.email || "").trim().toLowerCase();
+        const userIdKey = String(member.userId || "").trim();
+        const key = emailKey || userIdKey;
+        if (!key || seenKeys.has(key)) return;
+        seenKeys.add(key);
+        if (emailKey) lookupOr.push({ email: emailKey });
+        if (userIdKey && mongoose.Types.ObjectId.isValid(userIdKey)) {
+          lookupOr.push({ _id: userIdKey });
+        }
+      });
+
+      let validatedTeamMembers = [];
+      if (lookupOr.length > 0) {
+        const studentUsers = await User.find({ role: "student", $or: lookupOr }).select(
+          "_id name email regNumber batch course"
+        );
+        const byEmail = new Map(
+          studentUsers.map((user) => [String(user.email || "").toLowerCase(), user])
+        );
+        const byId = new Map(studentUsers.map((user) => [String(user._id), user]));
+        const teamErrors = [];
+
+        for (const member of parsedTeamMembers) {
+          const email = String(member.email || "").trim().toLowerCase();
+          const userId = String(member.userId || "").trim();
+          const matchedUser = (email && byEmail.get(email)) || (userId && byId.get(userId));
+
+          if (!matchedUser) {
+            teamErrors.push(`${member.email || member.name || "Unknown member"} is not a valid student user`);
+            continue;
+          }
+
+          const memberCourse = normalizeUpper(matchedUser.course);
+          const memberBatch = String(matchedUser.batch || "").trim();
+
+          if (uploaderCourse && memberCourse !== uploaderCourse) {
+            teamErrors.push(`${matchedUser.email} must be from course ${uploaderCourse}`);
+            continue;
+          }
+
+          if (uploaderBatch && memberBatch !== uploaderBatch) {
+            teamErrors.push(`${matchedUser.email} must be from batch ${uploaderBatch}`);
+            continue;
+          }
+
+          const dedupeKey = String(matchedUser.email || "").toLowerCase();
+          if (validatedTeamMembers.some((item) => String(item.email || "").toLowerCase() === dedupeKey)) {
+            continue;
+          }
+
+          validatedTeamMembers.push({
+            userId: matchedUser._id,
+            name: matchedUser.name || "",
+            email: matchedUser.email || "",
+            regNumber: matchedUser.regNumber || "",
+            batch: matchedUser.batch || "",
+            course: matchedUser.course || "",
+          });
+        }
+
+        if (teamErrors.length > 0) {
+          return res.status(400).json({ error: "Invalid teammates", details: teamErrors });
+        }
+      }
+
       const parsedResourceLinks = (resourceLinks || "")
         .split(/\r?\n|,/)
         .map((link) => link.trim())
         .filter(Boolean);
 
-      const ownerIncluded = parsedTeamMembers.some(
+      const ownerIncluded = validatedTeamMembers.some(
         (member) =>
           member.email &&
           String(member.email).toLowerCase() === String(req.user.email || "").toLowerCase()
       );
       if (!ownerIncluded) {
-        parsedTeamMembers.unshift({
+        validatedTeamMembers.unshift({
           userId: req.user.id,
           name: tokenProfile.studentName,
           email: req.user.email || "",
           regNumber: tokenProfile.regNumber || "",
+          batch: tokenProfile.batch || "",
           course: tokenProfile.course || "",
         });
       }
@@ -491,7 +599,7 @@ router.post(
         projectTitle,
         longDescription: description,
         documentation: documentation?.trim() || "",
-        teamMembers: parsedTeamMembers,
+        teamMembers: validatedTeamMembers,
         resourceLinks: parsedResourceLinks,
         resourceFiles: resourceFileUrls,
         technologiesUsed: technologiesUsed

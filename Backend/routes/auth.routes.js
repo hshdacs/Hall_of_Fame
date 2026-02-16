@@ -78,7 +78,7 @@ router.get(
   async (req, res) => {
     try {
       const users = await User.find({ role: "student" })
-        .select("_id name email regNumber course")
+        .select("_id name email regNumber batch course")
         .sort({ name: 1 });
       res.json(users);
     } catch (err) {

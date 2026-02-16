@@ -69,6 +69,7 @@ const projectSchema = new mongoose.Schema({
       name: { type: String },
       email: { type: String },
       regNumber: { type: String },
+      batch: { type: String },
       course: { type: String },
     },
   ],
