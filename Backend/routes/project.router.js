@@ -679,21 +679,12 @@ router.post(
 router.post(
   "/run/:id",
   auth,
-  checkRole(["student", "faculty", "admin"]),
+  checkRole(["viewer", "student", "faculty", "admin"]),
   async (req, res) => {
     try {
-      const project = await Project.findById(req.params.id).select("ownerUserId");
+      const project = await Project.findById(req.params.id).select("_id");
       if (!project) {
         return res.status(404).json({ error: "Project not found" });
-      }
-
-      const isOwner =
-        project.ownerUserId &&
-        String(project.ownerUserId) === String(req.user.id);
-      const canManage = req.user.role === "admin" || req.user.role === "faculty" || isOwner;
-
-      if (!canManage) {
-        return res.status(403).json({ error: "You can only start your own project" });
       }
 
       await enforceRunQuota({
@@ -701,7 +692,11 @@ router.post(
         role: req.user.role,
       });
 
-      const url = await runProject(req.params.id, req.user.role);
+      const url = await runProject(req.params.id, {
+        role: req.user.role,
+        userId: req.user.id,
+        email: req.user.email,
+      });
       res.json({ message: "Project started", url });
     } catch (err) {
       res.status(err.statusCode || 500).json({ error: err.message });
@@ -736,10 +731,10 @@ router.post(
 router.post(
   "/stop/:id",
   auth,
-  checkRole(["student", "faculty", "admin"]),
+  checkRole(["viewer", "student", "faculty", "admin"]),
   async (req, res) => {
     try {
-      const project = await Project.findById(req.params.id).select("ownerUserId");
+      const project = await Project.findById(req.params.id).select("ownerUserId startHistory");
       if (!project) {
         return res.status(404).json({ error: "Project not found" });
       }
@@ -747,14 +742,70 @@ router.post(
       const isOwner =
         project.ownerUserId &&
         String(project.ownerUserId) === String(req.user.id);
-      const canManage = req.user.role === "admin" || req.user.role === "faculty" || isOwner;
+      const startedByMe = (project.startHistory || []).some(
+        (entry) => entry?.startedByUserId && String(entry.startedByUserId) === String(req.user.id)
+      );
+      const canManage =
+        req.user.role === "admin" ||
+        req.user.role === "faculty" ||
+        isOwner ||
+        startedByMe;
 
       if (!canManage) {
-        return res.status(403).json({ error: "You can only stop your own project" });
+        return res.status(403).json({ error: "You can only stop projects you started" });
       }
 
       await stopProject(req.params.id);
       res.json({ message: "Project stopped" });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+router.post(
+  "/stop-on-logout",
+  auth,
+  checkRole(["viewer", "student", "faculty", "admin"]),
+  async (req, res) => {
+    try {
+      const runningProjects = await Project.find({ status: "running" }).select(
+        "_id projectTitle startHistory ownerUserId"
+      );
+
+      const shouldStop = runningProjects.filter((project) => {
+        const history = project.startHistory || [];
+        if (history.length === 0) return false;
+        const lastStart = history[history.length - 1];
+        return (
+          lastStart?.startedByUserId &&
+          String(lastStart.startedByUserId) === String(req.user.id)
+        );
+      });
+
+      const stopped = [];
+      const failed = [];
+
+      for (const project of shouldStop) {
+        try {
+          await stopProject(project._id);
+          stopped.push({ projectId: project._id, projectTitle: project.projectTitle || "" });
+        } catch (err) {
+          failed.push({
+            projectId: project._id,
+            projectTitle: project.projectTitle || "",
+            error: err.message,
+          });
+        }
+      }
+
+      res.json({
+        message: "Logout cleanup completed",
+        stoppedCount: stopped.length,
+        failedCount: failed.length,
+        stopped,
+        failed,
+      });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }

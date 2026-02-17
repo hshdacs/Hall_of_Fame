@@ -89,6 +89,8 @@ const projectSchema = new mongoose.Schema({
     {
       timestamp: { type: Date, default: Date.now },
       startedByRole: { type: String },
+      startedByUserId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      startedByEmail: { type: String },
     },
   ],
 });

@@ -44,7 +44,10 @@ const portNumbers =
   getPortPkg.portNumbers ||
   ((from, to) => Array.from({ length: to - from + 1 }, (_, i) => from + i));
 
-async function runProject(projectId, startedByRole = "system") {
+async function runProject(projectId, startedBy = {}) {
+  const startedByRole = startedBy?.role || "system";
+  const startedByUserId = startedBy?.userId || null;
+  const startedByEmail = startedBy?.email || "";
   const project = await Project.findById(projectId);
 
   if (!project) throw new Error("Project not found");
@@ -131,7 +134,7 @@ if (composeFile && fs.existsSync(composeFile)) {
     project.status = "running";
     project.startHistory = [
       ...(project.startHistory || []),
-      { timestamp: new Date(), startedByRole },
+      { timestamp: new Date(), startedByRole, startedByUserId, startedByEmail },
     ];
     await project.save();
 
@@ -161,7 +164,7 @@ if (composeFile && fs.existsSync(composeFile)) {
     project.status = "running";
     project.startHistory = [
       ...(project.startHistory || []),
-      { timestamp: new Date(), startedByRole },
+      { timestamp: new Date(), startedByRole, startedByUserId, startedByEmail },
     ];
     await project.save();
 
