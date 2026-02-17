@@ -1,0 +1,6 @@
+{
+  "watch": ["queue", "services", "db", "config"],
+  "ignore": ["uploads", "workspace", "logs"],
+  "ext": "js,json",
+  "exec": "node queue/buildWorker.js"
+}

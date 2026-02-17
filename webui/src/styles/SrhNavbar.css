@@ -1,0 +1,81 @@
+.srh-top-strip {
+  height: 50px;
+  background: #df4807;
+}
+
+.srh-nav {
+  position: sticky;
+  top: 50px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  background: #07233b;
+}
+
+.srh-brand {
+  display: flex;
+  align-items: center;
+}
+
+.srh-brand-logo {
+  height: 42px;
+  width: auto;
+  display: block;
+}
+
+.srh-links {
+  display: flex;
+  gap: 18px;
+}
+
+.srh-links a {
+  color: #d7e3ec;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.srh-links a:hover {
+  color: #fff;
+}
+
+.srh-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.srh-actions button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: #df4807;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.role-chip {
+  color: #fff;
+  font-size: 12px;
+  border: 1px solid #31516b;
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+
+@media (max-width: 900px) {
+  .srh-top-strip {
+    height: 42px;
+  }
+  .srh-nav {
+    top: 42px;
+  }
+  .srh-brand-logo {
+    height: 34px;
+  }
+  .srh-links {
+    display: none;
+  }
+}

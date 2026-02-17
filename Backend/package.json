@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env RUN_QUEUE=true dotenv_config_path=./config/development.env nodemon",
-    "dev:api": "cross-env RUN_QUEUE=false dotenv_config_path=./config/development.env nodemon",
-    "dev:worker": "cross-env RUN_QUEUE=true dotenv_config_path=./config/development.env nodemon queue/buildQueue.js",
-    "start": "cross-env RUN_QUEUE=true dotenv_config_path=./config/development.env node server.js",
+    "dev": "npm run dev:api",
+    "dev:api": "cross-env RUN_QUEUE=false dotenv_config_path=./config/development.env nodemon server.js",
+    "dev:worker": "cross-env RUN_QUEUE=true dotenv_config_path=./config/development.env nodemon --config nodemon.worker.json",
+    "start": "npm run start:api",
+    "start:api": "cross-env RUN_QUEUE=false dotenv_config_path=./config/development.env node server.js",
+    "start:worker": "cross-env RUN_QUEUE=true dotenv_config_path=./config/development.env node queue/buildWorker.js",
     "test": "jest",
     "lint": "eslint .",
     "prettier:check": "prettier -c '**/*.js'",
@@ -17,9 +19,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google-cloud/storage": "^7.17.2",
     "@bull-board/api": "^6.14.2",
     "@bull-board/express": "^6.14.2",
     "axios": "^1.7.2",
+    "bcrypt": "^6.0.0",
     "bull": "^4.16.5",
     "cors": "^2.8.5",
     "cross-env": "^10.1.0",
@@ -29,14 +33,18 @@
     "express-validator": "^7.1.0",
     "get-port": "^7.1.0",
     "js-yaml": "^4.1.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.4.4",
     "multer": "^2.0.2",
     "open": "^10.1.0",
     "simple-git": "^3.30.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tcp-port-used": "^1.0.2",
     "unzipper": "^0.12.3",
     "winston": "^3.13.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

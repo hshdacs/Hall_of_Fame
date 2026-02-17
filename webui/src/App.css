@@ -1,38 +1,51 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.route-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  background: rgba(9, 23, 40, 0.18);
+  backdrop-filter: blur(1px);
 }
 
-.App-link {
-  color: #61dafb;
+.route-loader.show {
+  opacity: 1;
 }
 
-@keyframes App-logo-spin {
+.route-loader-spinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.55);
+  border-top-color: #df4807;
+  animation: routeSpin 0.8s linear infinite;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+.route-fade {
+  animation: routeFadeIn 220ms ease;
+}
+
+@keyframes routeSpin {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes routeFadeIn {
+  from {
+    opacity: 0.1;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -15,10 +15,12 @@ const projectSchema = new mongoose.Schema({
 
   // 📁 Project Metadata
   projectTitle: { type: String, required: true },
+  projectTag: { type: String },
   longDescription: { type: String },
   githubUrl: { type: String },
   sourceType: { type: String }, // github | zip
   sourcePathOrUrl: { type: String },
+  ownerUserId: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
 
   // 🐳 Deployment & Build Info
   imageTag: { type: String },          // NEW
@@ -27,6 +29,10 @@ const projectSchema = new mongoose.Schema({
   internalPort: { type: Number },      // NEW (default 80)
   
   url: { type: String },
+
+   // 🧩 docker-compose specific fields (MISSING EARLIER)
+  frontendService: { type: String },   // NEW → required by runProject.js
+  frontendPort: { type: Number },     // NEW → required by runProject.js
 
   status: {
     type: String,
@@ -54,7 +60,21 @@ const projectSchema = new mongoose.Schema({
 
   // 🧠 Image carousel for frontend
   images: [{ type: String }],
+  demoVideo: { type: String },
   technologiesUsed: [{ type: String }],
+  documentation: { type: String },
+  teamMembers: [
+    {
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      name: { type: String },
+      email: { type: String },
+      regNumber: { type: String },
+      batch: { type: String },
+      course: { type: String },
+    },
+  ],
+  resourceLinks: [{ type: String }],
+  resourceFiles: [{ type: String }],
 
   // 🧩 Build History
   buildHistory: [
@@ -62,6 +82,15 @@ const projectSchema = new mongoose.Schema({
       timestamp: { type: Date, default: Date.now },
       status: { type: String },
       message: { type: String }
+    },
+  ],
+
+  startHistory: [
+    {
+      timestamp: { type: Date, default: Date.now },
+      startedByRole: { type: String },
+      startedByUserId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      startedByEmail: { type: String },
     },
   ],
 });

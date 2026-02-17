@@ -1,0 +1,247 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+:root {
+  --quota-bg: #f7f8fa;
+  --quota-panel: #ffffff;
+  --quota-text: #14202b;
+  --quota-sub: #5f6e7d;
+  --quota-accent: #df4807;
+  --quota-border: #e8edf3;
+  --quota-shadow: 0 10px 24px rgba(14, 33, 58, 0.08);
+}
+
+.quota-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at 20% 0%, #fff2eb 0, transparent 36%), var(--quota-bg);
+  font-family: "Poppins", sans-serif;
+}
+
+.quota-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  padding: 24px;
+}
+
+.quota-sidebar {
+  background: var(--quota-panel);
+  border: 1px solid var(--quota-border);
+  border-radius: 18px;
+  box-shadow: var(--quota-shadow);
+  padding: 20px;
+  height: fit-content;
+}
+
+.quota-brand {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--quota-text);
+}
+
+.quota-sub {
+  color: var(--quota-sub);
+  margin-top: 6px;
+}
+
+.quota-courses {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.course-pill {
+  background: #fff5ef;
+  color: #b83a06;
+  border: 1px solid #ffd5c0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sidebar-note {
+  margin-top: 16px;
+  color: var(--quota-sub);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.quota-main {
+  display: grid;
+  gap: 18px;
+}
+
+.token-bar {
+  display: flex;
+  gap: 10px;
+}
+
+.token-input {
+  flex: 1;
+  border: 1px solid var(--quota-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  background: #fff;
+}
+
+.load-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(120deg, #df4807, #ff7e3f);
+  cursor: pointer;
+}
+
+.load-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-box {
+  background: #fff1f0;
+  color: #a72c2c;
+  border: 1px solid #ffd5d2;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stat-card {
+  background: var(--quota-panel);
+  border: 1px solid var(--quota-border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--quota-shadow);
+}
+
+.stat-label {
+  color: var(--quota-sub);
+  font-size: 13px;
+}
+
+.stat-value {
+  color: var(--quota-text);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.panel {
+  background: var(--quota-panel);
+  border: 1px solid var(--quota-border);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: var(--quota-shadow);
+}
+
+.panel h3 {
+  margin: 0 0 14px;
+  color: var(--quota-text);
+}
+
+.course-list {
+  display: grid;
+  gap: 12px;
+}
+
+.course-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 180px;
+  align-items: center;
+  gap: 12px;
+}
+
+.course-name {
+  font-weight: 700;
+  color: var(--quota-text);
+}
+
+.progress-track {
+  height: 10px;
+  background: #eef2f7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #df4807, #ffb088);
+  border-radius: 999px;
+}
+
+.course-meta {
+  color: var(--quota-sub);
+  font-size: 13px;
+}
+
+.risk-table {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 0.8fr;
+  border: 1px solid var(--quota-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.risk-head {
+  background: #f4f6fa;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--quota-sub);
+  border-bottom: 1px solid var(--quota-border);
+}
+
+.risk-cell {
+  padding: 10px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--quota-border);
+  color: var(--quota-text);
+}
+
+.risk-high {
+  color: #cc2020;
+  font-weight: 700;
+}
+
+.risk-mid {
+  color: #c88400;
+  font-weight: 700;
+}
+
+.risk-low {
+  color: #1f8f4d;
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .quota-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .course-row {
+    grid-template-columns: 60px 1fr;
+  }
+
+  .course-meta {
+    grid-column: 1 / -1;
+  }
+
+  .risk-table {
+    grid-template-columns: 1fr;
+  }
+
+  .risk-head {
+    display: none;
+  }
+}
