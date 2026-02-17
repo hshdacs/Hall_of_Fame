@@ -107,6 +107,28 @@
   color: #132844;
 }
 
+.upload-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.clear-draft-btn {
+  border: 1px solid #d5e1ee;
+  border-radius: 9px;
+  background: #f6faff;
+  color: #17334f;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.clear-draft-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .upload-main p {
   color: #607a90;
   margin: 6px 0 14px;

@@ -147,6 +147,7 @@ const UploadProjectPage = () => {
     resourceDocs: [],
   });
   const [saving, setSaving] = useState(false);
+  const [fileInputResetKey, setFileInputResetKey] = useState(0);
   const hydratedRef = useRef(false);
 
   const imagePreviews = useMemo(
@@ -174,6 +175,41 @@ const UploadProjectPage = () => {
       return !sameEmail && sameCourse && sameBatch;
     });
   }, [students, profile.email, profileBatch, profileCourse]);
+
+  const hasDraftContent = useMemo(() => {
+    return Boolean(
+      form.projectTitle.trim() ||
+        form.description.trim() ||
+        form.githubUrl.trim() ||
+        form.projectTag !== "AI" ||
+        zipFile ||
+        zipFileName ||
+        images.length ||
+        imageFileNames.length ||
+        videoFile ||
+        videoFileName ||
+        resourceDocs.length ||
+        resourceDocNames.length ||
+        resourceLinksText.trim() ||
+        documentation.trim() ||
+        teammates.length ||
+        techStack.length
+    );
+  }, [
+    form,
+    zipFile,
+    zipFileName,
+    images.length,
+    imageFileNames.length,
+    videoFile,
+    videoFileName,
+    resourceDocs.length,
+    resourceDocNames.length,
+    resourceLinksText,
+    documentation,
+    teammates.length,
+    techStack.length,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -549,6 +585,38 @@ const UploadProjectPage = () => {
     }
   };
 
+  const clearDraft = () => {
+    setStep(1);
+    setForm({
+      projectTag: "AI",
+      projectTitle: "",
+      description: "",
+      githubUrl: "",
+    });
+    setZipFile(null);
+    setZipFileName("");
+    setImages([]);
+    setImageFileNames([]);
+    setVideoFile(null);
+    setVideoFileName("");
+    setResourceDocs([]);
+    setResourceDocNames([]);
+    setResourceLinksText("");
+    setDocumentation("");
+    setTeammates([]);
+    setSelectedTeammateEmail("");
+    setTechStack([]);
+    setFileErrors({
+      zip: [],
+      images: [],
+      video: [],
+      resourceDocs: [],
+    });
+    localStorage.removeItem(UPLOAD_DRAFT_KEY);
+    setFileInputResetKey((prev) => prev + 1);
+    toast("Draft cleared.", "success");
+  };
+
   const stepClass = (targetStep) => {
     if (step === targetStep) return "step active";
     if (step > targetStep) return "step done";
@@ -582,7 +650,19 @@ const UploadProjectPage = () => {
         </aside>
 
         <main className="upload-main">
-          <h1>Write Project Documentation</h1>
+          <div className="upload-head">
+            <h1>Write Project Documentation</h1>
+            {hasDraftContent && (
+              <button
+                type="button"
+                className="clear-draft-btn"
+                onClick={clearDraft}
+                disabled={saving}
+              >
+                Clear Draft
+              </button>
+            )}
+          </div>
           <p>Step {step} of 3</p>
           {buildError && (
             <div className="upload-error-box">
@@ -654,6 +734,7 @@ const UploadProjectPage = () => {
                     disabled={saving}
                   />
                   <input
+                    key={`zip-input-${fileInputResetKey}`}
                     className="full"
                     type="file"
                     accept=".zip"
@@ -737,6 +818,7 @@ const UploadProjectPage = () => {
                 <h3>Assets & Media</h3>
                 <label className="field-label">Image Gallery</label>
                 <input
+                  key={`images-input-${fileInputResetKey}`}
                   type="file"
                   accept="image/*"
                   multiple
@@ -762,6 +844,7 @@ const UploadProjectPage = () => {
                 <div className="video-upload">
                   <h4>Project Demo Video (optional)</h4>
                   <input
+                    key={`video-input-${fileInputResetKey}`}
                     type="file"
                     accept="video/*"
                     onChange={handleVideoChange}
@@ -801,6 +884,7 @@ const UploadProjectPage = () => {
                 <div className="resource-docs">
                   <h4>Reference PDFs / Notes (optional)</h4>
                   <input
+                    key={`resource-input-${fileInputResetKey}`}
                     type="file"
                     accept=".pdf,.doc,.docx,.txt"
                     multiple

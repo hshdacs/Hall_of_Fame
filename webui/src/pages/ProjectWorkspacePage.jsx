@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
@@ -10,6 +10,7 @@ import "../styles/ProjectWorkspacePage.css";
 
 const ProjectWorkspacePage = () => {
   const { projectId } = useParams();
+  const navigate = useNavigate();
   const token = getToken();
   const role = getRole();
   const profile = getUserProfile();
@@ -282,6 +283,32 @@ const ProjectWorkspacePage = () => {
         </aside>
 
         <section className="workspace-main">
+          <div className="workspace-topbar">
+            <button
+              type="button"
+              className="workspace-back-btn"
+              onClick={() => navigate("/projects")}
+              aria-label="Back to projects"
+              title="Back"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M19 12H6m6-6-6 6 6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
           <h1>{project.projectTitle}</h1>
           <div className="meta-row">
             <span>{project.studentName || "Unknown"}</span>

@@ -25,6 +25,25 @@
   padding: 16px;
 }
 
+.workspace-topbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.workspace-back-btn {
+  border: 0;
+  background: transparent;
+  color: #111;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 .workspace-left-nav {
   padding: 14px;
   height: fit-content;
