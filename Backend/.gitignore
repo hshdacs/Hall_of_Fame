@@ -25,3 +25,10 @@ Thumbs.db
 
 dump.rdb
 *.rdb
+srh-hof.json
+*.json
+!package*.json
+srh-hof.json
+*-service-account*.json
+*-hof*.json
+Backend/srh-hof.json
