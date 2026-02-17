@@ -5,7 +5,7 @@ import SrhNavbar from "../components/SrhNavbar";
 import "../styles/ProjectsGalleryPage.css";
 
 const VISIBLE_PROJECT_STATUSES = new Set(["ready", "running", "stopped"]);
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 12;
 
 const getTeamSummary = (project) => {
   const members = Array.isArray(project?.teamMembers) ? project.teamMembers : [];

@@ -283,7 +283,7 @@ const ProjectWorkspacePage = () => {
         </aside>
 
         <section className="workspace-main">
-          <div className="workspace-topbar">
+          <div className="workspace-title-row">
             <button
               type="button"
               className="workspace-back-btn"
@@ -308,13 +308,15 @@ const ProjectWorkspacePage = () => {
                 />
               </svg>
             </button>
+            <h1>{project.projectTitle}</h1>
           </div>
-          <h1>{project.projectTitle}</h1>
           <div className="meta-row">
-            <span>{project.studentName || "Unknown"}</span>
-            <span>{project.course || "NA"}</span>
-            <span>{project.projectTag || "General"}</span>
-            <span>{teamMembers.length > 1 ? `Team ${teamMembers.length}` : "Solo"}</span>
+            <span className="meta-badge">{project.studentName || "Unknown"}</span>
+            <span className="meta-badge">{project.course || "NA"}</span>
+            <span className="meta-badge">{project.projectTag || "General"}</span>
+            <span className="meta-badge">
+              {teamMembers.length > 1 ? `Team ${teamMembers.length}` : "Solo"}
+            </span>
             <span className={`status status-${project.status}`}>{project.status}</span>
           </div>
 

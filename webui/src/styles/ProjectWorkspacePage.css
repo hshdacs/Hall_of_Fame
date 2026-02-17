@@ -4,11 +4,11 @@
 }
 
 .workspace-grid {
-  width: min(1760px, calc(100vw - 36px));
+  width: min(1700px, calc(100vw - 20px));
   margin: 20px auto;
   padding: 0 8px 28px;
   display: grid;
-  grid-template-columns: 260px minmax(780px, 1fr) 340px;
+  grid-template-columns: clamp(180px, 18vw, 260px) minmax(0, 1fr) clamp(260px, 24vw, 340px);
   gap: 16px;
 }
 
@@ -23,12 +23,15 @@
 
 .workspace-main {
   padding: 16px;
+  min-width: 0;
 }
 
-.workspace-topbar {
+.workspace-title-row {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 10px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
 }
 
 .workspace-back-btn {
@@ -42,6 +45,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.workspace-title-row h1 {
+  margin: 0;
 }
 
 .workspace-left-nav {
@@ -58,19 +65,31 @@
 }
 
 .meta-row {
-  margin-top: 8px;
+  margin-top: 10px;
+  margin-bottom: 14px;
   display: flex;
-  gap: 10px;
-  color: #6b7c8f;
-  font-size: 13px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meta-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d5e2ef;
+  background: #f7fbff;
+  color: #4f6378;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .status {
-  padding: 2px 9px;
+  padding: 4px 10px;
   border-radius: 999px;
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .status-running {
@@ -503,16 +522,53 @@
   color: #26415d;
 }
 
+@media (max-width: 1460px) {
+  .workspace-grid {
+    width: calc(100vw - 16px);
+    gap: 12px;
+    grid-template-columns: 220px minmax(0, 1fr) 300px;
+  }
+}
+
+@media (max-width: 1240px) {
+  .workspace-grid {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+
+  .workspace-left-nav {
+    grid-column: 1 / -1;
+    position: static;
+  }
+
+  .content-tabs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .content-tabs-nav button {
+    text-align: center;
+    min-width: 120px;
+  }
+}
+
 @media (max-width: 980px) {
   .workspace-grid {
     grid-template-columns: 1fr;
+    width: calc(100vw - 12px);
+    padding: 0 4px 20px;
   }
 
   .workspace-left-nav {
     position: static;
   }
 
+  .workspace-side {
+    order: 3;
+  }
+
   .content-tabs-nav {
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
