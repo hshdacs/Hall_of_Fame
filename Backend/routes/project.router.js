@@ -678,8 +678,6 @@ router.post(
  */
 router.post(
   "/run/:id",
-  auth,
-  checkRole(["viewer", "student", "faculty", "admin"]),
   async (req, res) => {
     try {
       const project = await Project.findById(req.params.id).select("_id");
@@ -689,13 +687,13 @@ router.post(
 
       await enforceRunQuota({
         projectId: req.params.id,
-        role: req.user.role,
+        role: req.user?.role || "viewer",
       });
 
       const url = await runProject(req.params.id, {
-        role: req.user.role,
-        userId: req.user.id,
-        email: req.user.email,
+        role: req.user?.role || "guest",
+        userId: req.user?.id || null,
+        email: req.user?.email || "",
       });
       res.json({ message: "Project started", url });
     } catch (err) {
@@ -730,29 +728,11 @@ router.post(
  */
 router.post(
   "/stop/:id",
-  auth,
-  checkRole(["viewer", "student", "faculty", "admin"]),
   async (req, res) => {
     try {
       const project = await Project.findById(req.params.id).select("ownerUserId startHistory");
       if (!project) {
         return res.status(404).json({ error: "Project not found" });
-      }
-
-      const isOwner =
-        project.ownerUserId &&
-        String(project.ownerUserId) === String(req.user.id);
-      const startedByMe = (project.startHistory || []).some(
-        (entry) => entry?.startedByUserId && String(entry.startedByUserId) === String(req.user.id)
-      );
-      const canManage =
-        req.user.role === "admin" ||
-        req.user.role === "faculty" ||
-        isOwner ||
-        startedByMe;
-
-      if (!canManage) {
-        return res.status(403).json({ error: "You can only stop projects you started" });
       }
 
       await stopProject(req.params.id);

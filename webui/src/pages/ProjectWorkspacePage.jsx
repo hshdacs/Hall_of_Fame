@@ -5,6 +5,7 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import SrhNavbar from "../components/SrhNavbar";
 import { getRole, getToken, getUserProfile } from "../lib/session";
+import { getLanguage, onLanguageChange, t } from "../lib/preferences";
 import { useToast } from "../components/ToastProvider";
 import "../styles/ProjectWorkspacePage.css";
 
@@ -25,14 +26,17 @@ const ProjectWorkspacePage = () => {
   const [remarkBusy, setRemarkBusy] = useState(false);
   const [commentBusy, setCommentBusy] = useState(false);
   const [activePanel, setActivePanel] = useState("description");
+  const [language, setLanguage] = useState(getLanguage());
   const { toast } = useToast();
+
+  useEffect(() => onLanguageChange(setLanguage), []);
 
   const loadProject = async () => {
     try {
       const res = await axios.get(`http://localhost:8020/api/project/details/${projectId}`);
       setProject(res.data);
     } catch (_err) {
-      setError("Unable to load project details.");
+      setError("Projektdetails konnten nicht geladen werden.");
     }
   };
 
@@ -107,24 +111,30 @@ const ProjectWorkspacePage = () => {
   }, [project]);
   const resourceLinks = Array.isArray(project?.resourceLinks) ? project.resourceLinks : [];
   const resourceFiles = Array.isArray(project?.resourceFiles) ? project.resourceFiles : [];
+  const translatedStatus =
+    {
+      running: "LÄUFT",
+      stopped: "GESTOPPT",
+      build_failed: "BUILD FEHLGESCHLAGEN",
+      failed: "FEHLGESCHLAGEN",
+      queued: "IN WARTESCHLANGE",
+      building: "WIRD GEBAUT",
+      ready: "BEREIT",
+    }[String(project?.status || "").toLowerCase()] || String(project?.status || "").toUpperCase();
 
   const callRunStop = async (type) => {
-    if (!token) {
-      toast("Please login first.", "error");
-      return;
-    }
     setBusy(true);
     try {
+      const config = token
+        ? { headers: { Authorization: `Bearer ${token}` } }
+        : {};
       await axios.post(
         `http://localhost:8020/api/project/${type}/${projectId}`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        config
       );
       await loadProject();
-      toast(
-        type === "run" ? "Project started successfully." : "Project stopped successfully.",
-        "success"
-      );
+      toast(type === "run" ? "Projekt erfolgreich gestartet." : "Projekt erfolgreich gestoppt.", "success");
     } catch (err) {
       toast(err?.response?.data?.error || `Failed to ${type} project`, "error");
     } finally {
@@ -134,7 +144,7 @@ const ProjectWorkspacePage = () => {
 
   const submitRemark = async () => {
     if (!remarkText.trim()) {
-      toast("Enter a remark first.", "error");
+      toast("Bitte zuerst eine Bemerkung eingeben.", "error");
       return;
     }
     setRemarkBusy(true);
@@ -147,9 +157,9 @@ const ProjectWorkspacePage = () => {
       setRemarkText("");
       setPublishNow(false);
       await loadRemarks();
-      toast("Remark saved.", "success");
+      toast("Bemerkung gespeichert.", "success");
     } catch (err) {
-      toast(err?.response?.data?.error || "Failed to save remark", "error");
+      toast(err?.response?.data?.error || "Bemerkung konnte nicht gespeichert werden.", "error");
     } finally {
       setRemarkBusy(false);
     }
@@ -164,9 +174,9 @@ const ProjectWorkspacePage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       await loadRemarks();
-      toast("Remark visibility updated.", "success");
+      toast("Sichtbarkeit der Bemerkung aktualisiert.", "success");
     } catch (err) {
-      toast(err?.response?.data?.error || "Failed to update visibility", "error");
+      toast(err?.response?.data?.error || "Sichtbarkeit konnte nicht aktualisiert werden.", "error");
     } finally {
       setRemarkBusy(false);
     }
@@ -174,7 +184,7 @@ const ProjectWorkspacePage = () => {
 
   const submitComment = async () => {
     if (!commentText.trim()) {
-      toast("Enter a comment first.", "error");
+      toast("Bitte zuerst einen Kommentar eingeben.", "error");
       return;
     }
     setCommentBusy(true);
@@ -186,9 +196,9 @@ const ProjectWorkspacePage = () => {
       );
       setCommentText("");
       await loadComments();
-      toast("Comment posted.", "success");
+      toast("Kommentar gesendet.", "success");
     } catch (err) {
-      toast(err?.response?.data?.error || "Failed to post comment", "error");
+      toast(err?.response?.data?.error || "Kommentar konnte nicht gesendet werden.", "error");
     } finally {
       setCommentBusy(false);
     }
@@ -205,9 +215,9 @@ const ProjectWorkspacePage = () => {
     }
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast("Project link copied.", "success");
+      toast("Projektlink wurde kopiert.", "success");
     } catch (_err) {
-      toast("Unable to copy link.", "error");
+      toast("Link konnte nicht kopiert werden.", "error");
     }
   };
 
@@ -224,7 +234,7 @@ const ProjectWorkspacePage = () => {
     return (
       <div>
         <SrhNavbar />
-        <p className="workspace-error">Loading project...</p>
+        <p className="workspace-error">Projekt wird geladen...</p>
       </div>
     );
   }
@@ -240,35 +250,35 @@ const ProjectWorkspacePage = () => {
               className={activePanel === "description" ? "active" : ""}
               onClick={() => setActivePanel("description")}
             >
-              Description
+              {t(language, "description")}
             </button>
             <button
               type="button"
               className={activePanel === "team" ? "active" : ""}
               onClick={() => setActivePanel("team")}
             >
-              Team
+              {t(language, "team")}
             </button>
             <button
               type="button"
               className={activePanel === "documentation" ? "active" : ""}
               onClick={() => setActivePanel("documentation")}
             >
-              Documentation
+              {t(language, "documentation")}
             </button>
             <button
               type="button"
               className={activePanel === "resources" ? "active" : ""}
               onClick={() => setActivePanel("resources")}
             >
-              Resources
+              {t(language, "resources")}
             </button>
             <button
               type="button"
               className={activePanel === "comments" ? "active" : ""}
               onClick={() => setActivePanel("comments")}
             >
-              Comments
+              {t(language, "comments")}
             </button>
             {canSeeBuildLogs && (
               <button
@@ -276,7 +286,7 @@ const ProjectWorkspacePage = () => {
                 className={activePanel === "buildlogs" ? "active" : ""}
                 onClick={() => setActivePanel("buildlogs")}
               >
-                Build Logs
+                {t(language, "buildLogs")}
               </button>
             )}
           </nav>
@@ -288,8 +298,8 @@ const ProjectWorkspacePage = () => {
               type="button"
               className="workspace-back-btn"
               onClick={() => navigate("/projects")}
-              aria-label="Back to projects"
-              title="Back"
+              aria-label={t(language, "back")}
+              title={t(language, "back")}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -311,13 +321,13 @@ const ProjectWorkspacePage = () => {
             <h1>{project.projectTitle}</h1>
           </div>
           <div className="meta-row">
-            <span className="meta-badge">{project.studentName || "Unknown"}</span>
+            <span className="meta-badge">{project.studentName || t(language, "unknown")}</span>
             <span className="meta-badge">{project.course || "NA"}</span>
-            <span className="meta-badge">{project.projectTag || "General"}</span>
+            <span className="meta-badge">{project.projectTag || t(language, "general")}</span>
             <span className="meta-badge">
-              {teamMembers.length > 1 ? `Team ${teamMembers.length}` : "Solo"}
+              {teamMembers.length > 1 ? `Team ${teamMembers.length}` : t(language, "solo")}
             </span>
-            <span className={`status status-${project.status}`}>{project.status}</span>
+            <span className={`status status-${project.status}`}>{translatedStatus}</span>
           </div>
 
           {images.length > 0 ? (
@@ -329,28 +339,28 @@ const ProjectWorkspacePage = () => {
               ))}
             </Carousel>
           ) : (
-            <div className="no-image">No project images uploaded</div>
+            <div className="no-image">{t(language, "noImages")}</div>
           )}
 
           <div className="content-tabs-layout">
             <div className="content-tabs-panel">
               {activePanel === "description" && (
                 <article className="workspace-section">
-                  <h3>Project Overview</h3>
-                  <p>{project.longDescription || "No description provided."}</p>
+                  <h3>{t(language, "projectOverview")}</h3>
+                  <p>{project.longDescription || t(language, "noDescription")}</p>
 
                   {project.demoVideo && (
                     <div style={{ marginTop: "12px" }}>
-                      <h3>Demo Video</h3>
+                      <h3>{t(language, "demoVideo")}</h3>
                       <video controls style={{ width: "100%", borderRadius: "10px" }}>
                         <source src={project.demoVideo} />
-                        Your browser does not support embedded video playback.
+                        {t(language, "browserNoVideo")}
                       </video>
                     </div>
                   )}
 
                   <div style={{ marginTop: "12px" }}>
-                    <h3>Tech Stack</h3>
+                    <h3>{t(language, "techStack")}</h3>
                     <div className="stack-list">
                       {(project.technologiesUsed || []).map((tech) => (
                         <span key={tech}>{tech}</span>
@@ -362,15 +372,15 @@ const ProjectWorkspacePage = () => {
 
               {activePanel === "team" && (
                 <article className="workspace-section">
-                  <h3>Team Members</h3>
+                  <h3>{t(language, "teamMembers")}</h3>
                   {teamMembers.length === 0 ? (
-                    <p className="comment-empty">No teammates listed.</p>
+                    <p className="comment-empty">{t(language, "noTeammates")}</p>
                   ) : (
                     <div className="team-list project-team-list">
                       {teamMembers.map((member, index) => (
                         <div key={`${member.email}-${index}`} className="team-item">
                           <span className="team-item-main">
-                            {member.name || "Member"} {member.email ? `- ${member.email}` : ""}
+                            {member.name || "Mitglied"} {member.email ? `- ${member.email}` : ""}
                           </span>
                           <span className="team-item-meta">
                             {member.regNumber || "NA"} | {member.course || "NA"} | {member.batch || "NA"}
@@ -384,16 +394,16 @@ const ProjectWorkspacePage = () => {
 
               {activePanel === "documentation" && (
                 <article className="workspace-section">
-                  <h3>Documentation</h3>
-                  <p>{project.documentation || "No documentation added yet."}</p>
+                  <h3>{t(language, "documentation")}</h3>
+                  <p>{project.documentation || "Noch keine Dokumentation hinzugefügt."}</p>
                 </article>
               )}
 
               {activePanel === "resources" && (
                 <article className="workspace-section">
-                  <h3>Reference Links</h3>
+                  <h3>{t(language, "referenceLinks")}</h3>
                   {resourceLinks.length === 0 ? (
-                    <p className="comment-empty">No resource links added.</p>
+                    <p className="comment-empty">{t(language, "noResourceLinks")}</p>
                   ) : (
                     <ul className="resource-links-list">
                       {resourceLinks.map((link, index) => (
@@ -406,15 +416,15 @@ const ProjectWorkspacePage = () => {
                     </ul>
                   )}
 
-                  <h3 style={{ marginTop: "12px" }}>Resource Files</h3>
+                  <h3 style={{ marginTop: "12px" }}>{t(language, "resourceFiles")}</h3>
                   {resourceFiles.length === 0 ? (
-                    <p className="comment-empty">No files added.</p>
+                    <p className="comment-empty">{t(language, "noFilesAdded")}</p>
                   ) : (
                     <ul className="resource-links-list">
                       {resourceFiles.map((fileUrl, index) => (
                         <li key={`${fileUrl}-${index}`}>
                           <a href={fileUrl} target="_blank" rel="noreferrer">
-                            Open resource file {index + 1}
+                            {t(language, "openResourceFile")} {index + 1}
                           </a>
                         </li>
                       ))}
@@ -425,9 +435,9 @@ const ProjectWorkspacePage = () => {
 
               {activePanel === "comments" && (
                 <article className="workspace-section">
-                  <h3>Project Comments</h3>
+                  <h3>{t(language, "projectComments")}</h3>
                   <div className="comment-list">
-                    {comments.length === 0 && <p className="comment-empty">No comments yet.</p>}
+                    {comments.length === 0 && <p className="comment-empty">{t(language, "noComments")}</p>}
                     {comments.map((item) => (
                       <div key={item._id} className="comment-item">
                         <div className="comment-head">
@@ -441,32 +451,32 @@ const ProjectWorkspacePage = () => {
                   {canComment ? (
                     <div className="comment-form">
                       <textarea
-                        placeholder="Add your comment..."
+                        placeholder={t(language, "addComment")}
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
                         disabled={commentBusy}
                       />
                       <button type="button" onClick={submitComment} disabled={commentBusy}>
-                        {commentBusy ? "Posting..." : "Post Comment"}
+                        {commentBusy ? t(language, "posting") : t(language, "postComment")}
                       </button>
                     </div>
                   ) : (
-                    <p className="comment-empty">Login to add a comment.</p>
+                    <p className="comment-empty">{t(language, "loginToComment")}</p>
                   )}
                 </article>
               )}
 
               {activePanel === "buildlogs" && canSeeBuildLogs && (
                 <article className="workspace-section">
-                  <h3>Build Logs</h3>
+                  <h3>{t(language, "buildLogs")}</h3>
                   <div className="build-logs-history">
                     <details open>
-                      <summary>Build Log</summary>
-                      <pre>{project?.logs?.build || "No build logs available."}</pre>
+                      <summary>{t(language, "buildLog")}</summary>
+                      <pre>{project?.logs?.build || t(language, "noBuildLogs")}</pre>
                     </details>
                     <details>
-                      <summary>Deploy Log</summary>
-                      <pre>{project?.logs?.deploy || "No deploy logs available."}</pre>
+                      <summary>{t(language, "deployLog")}</summary>
+                      <pre>{project?.logs?.deploy || t(language, "noDeployLogs")}</pre>
                     </details>
                   </div>
                 </article>
@@ -477,7 +487,7 @@ const ProjectWorkspacePage = () => {
 
         <aside className="workspace-side">
           <div className="side-card">
-            <h3>Run Controls</h3>
+            <h3>{t(language, "runControls")}</h3>
             <button
               className={isRunning ? "stop" : ""}
               disabled={busy}
@@ -486,41 +496,41 @@ const ProjectWorkspacePage = () => {
               {busy ? (
                 <span className="btn-loading">
                   <span className="btn-spinner" />
-                  {isRunning ? "Stopping..." : "Starting..."}
+                  {isRunning ? t(language, "stopping") : t(language, "starting")}
                 </span>
               ) : isRunning ? (
-                "Stop Project"
+                t(language, "stopProject")
               ) : (
-                "Start Project"
+                t(language, "startProject")
               )}
             </button>
 
             <div className="runtime-meta">
               <div className={`runtime-status ${isRunning ? "active" : ""}`}>
                 <span className="status-dot" />
-                {isRunning ? "Running" : "Not running"}
+                {isRunning ? t(language, "running") : t(language, "notRunning")}
               </div>
               {isRunning && project.url && project.url !== "docker-compose" && (
                 <a href={project.url} target="_blank" rel="noreferrer">
-                  Open Live URL
+                  {t(language, "openLiveUrl")}
                 </a>
               )}
             </div>
 
             <div className="share-actions">
               <button type="button" onClick={shareProject}>
-                Share Project
+                {t(language, "shareProject")}
               </button>
             </div>
           </div>
 
           {canSeeEvaluationPanel && (
             <div className="side-card">
-              <h3>Evaluation Panel</h3>
+              <h3>{t(language, "evaluationPanel")}</h3>
               {canCreateRemarks && (
                 <div className="remark-form">
                   <textarea
-                    placeholder="Add teacher remark..."
+                    placeholder={t(language, "addTeacherRemark")}
                     value={remarkText}
                     onChange={(e) => setRemarkText(e.target.value)}
                     disabled={remarkBusy}
@@ -532,16 +542,16 @@ const ProjectWorkspacePage = () => {
                       onChange={(e) => setPublishNow(e.target.checked)}
                       disabled={remarkBusy}
                     />
-                    Publish to student now
+                    {t(language, "publishToStudent")}
                   </label>
                   <button type="button" onClick={submitRemark} disabled={remarkBusy}>
-                    {remarkBusy ? "Saving..." : "Save Remark"}
+                    {remarkBusy ? t(language, "saving") : t(language, "saveRemark")}
                   </button>
                 </div>
               )}
 
               <div className="remark-list">
-                {remarks.length === 0 && <p>No remarks yet.</p>}
+                {remarks.length === 0 && <p>{t(language, "noRemarks")}</p>}
                 {remarks.map((item) => {
                   const isCreator = String(item.teacherUserId) === String(currentUserId);
                   const canToggle = role === "admin" || (canCreateRemarks && isCreator);
@@ -550,7 +560,7 @@ const ProjectWorkspacePage = () => {
                       <div className="remark-head">
                         <strong>{item.teacherName}</strong>
                         <span className={item.isPublished ? "published" : "draft"}>
-                          {item.isPublished ? "Published" : "Draft"}
+                          {item.isPublished ? t(language, "published") : t(language, "draft")}
                         </span>
                       </div>
                       <p>{item.remark}</p>
@@ -561,7 +571,7 @@ const ProjectWorkspacePage = () => {
                           onClick={() => toggleRemarkPublish(item)}
                           disabled={remarkBusy}
                         >
-                          {item.isPublished ? "Unpublish" : "Publish"}
+                          {item.isPublished ? t(language, "unpublish") : t(language, "publish")}
                         </button>
                       )}
                     </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import SrhNavbar from "../components/SrhNavbar";
+import { getLanguage, onLanguageChange, t } from "../lib/preferences";
 import { getToken, getUserProfile } from "../lib/session";
 import { useToast } from "../components/ToastProvider";
 import "../styles/UploadProjectPage.css";
@@ -118,6 +119,7 @@ const UploadProjectPage = () => {
   const uploadDraft = location.state?.uploadDraft || null;
   const profile = getUserProfile();
   const { toast } = useToast();
+  const [language, setLanguage] = useState(getLanguage());
 
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -149,6 +151,8 @@ const UploadProjectPage = () => {
   const [saving, setSaving] = useState(false);
   const [fileInputResetKey, setFileInputResetKey] = useState(0);
   const hydratedRef = useRef(false);
+
+  useEffect(() => onLanguageChange(setLanguage), []);
 
   const imagePreviews = useMemo(
     () => images.map((file) => ({ file, src: URL.createObjectURL(file) })),
@@ -445,29 +449,29 @@ const UploadProjectPage = () => {
     if (!selectedTeammateEmail) return;
     const match = students.find((s) => s.email === selectedTeammateEmail);
     if (!match) {
-      toast("Selected teammate not found.", "error");
+      toast(t(language, "selectedTeammateNotFound"), "error");
       return;
     }
     const alreadyAdded = teammates.some((t) => t.email === match.email);
     const isSelf =
       String(match.email).toLowerCase() === String(profile.email || "").toLowerCase();
     if (alreadyAdded) {
-      toast("Teammate already added.", "error");
+      toast(t(language, "teammateAlreadyAdded"), "error");
       return;
     }
     if (isSelf) {
-      toast("You are already included as project owner.", "error");
+      toast(t(language, "ownerAlreadyIncluded"), "error");
       return;
     }
 
     const matchCourse = String(match.course || "").trim().toUpperCase();
     const matchBatch = String(match.batch || "").trim();
     if (matchCourse !== profileCourse) {
-      toast(`Teammate must be from course ${profileCourse}.`, "error");
+      toast(`${t(language, "teammateMustMatchCourse")} (${profileCourse}).`, "error");
       return;
     }
     if (profileBatch && matchBatch !== profileBatch) {
-      toast(`Teammate must be from batch ${profileBatch}.`, "error");
+      toast(`${t(language, "teammateMustMatchBatch")} (${profileBatch}).`, "error");
       return;
     }
 
@@ -491,32 +495,32 @@ const UploadProjectPage = () => {
 
   const validateStepOne = () => {
     if (!form.projectTitle.trim()) {
-      toast("Please enter project title.", "error");
+      toast(t(language, "projectTitle"), "error");
       return false;
     }
     if (!form.description.trim()) {
-      toast("Please enter project description.", "error");
+      toast(t(language, "projectDescription"), "error");
       return false;
     }
     if (!form.githubUrl.trim() && !zipFile) {
-      toast("Provide GitHub URL or ZIP file.", "error");
+      toast(t(language, "provideGithubOrZip"), "error");
       return false;
     }
     if (form.githubUrl.trim() && zipFile) {
-      toast("Use only one source: GitHub URL or ZIP.", "error");
+      toast(t(language, "onlyOneSource"), "error");
       return false;
     }
     if (form.githubUrl.trim() && !isValidGithubRepoUrl(form.githubUrl)) {
-      toast("Enter a valid GitHub repo URL (example: https://github.com/owner/repo).", "error");
+      toast(t(language, "validGithubUrl"), "error");
       return false;
     }
     if (techStack.length === 0) {
-      toast("Select at least one technology.", "error");
+      toast(t(language, "selectTechnology"), "error");
       return false;
     }
     const hasFileErrors = Object.values(fileErrors).some((errs) => errs.length > 0);
     if (hasFileErrors) {
-      toast("Fix file validation errors before continuing.", "error");
+      toast(t(language, "fixValidationErrors"), "error");
       return false;
     }
     return true;
@@ -534,7 +538,7 @@ const UploadProjectPage = () => {
   const onSubmit = async () => {
     const token = getToken();
     if (!token) {
-      toast("Please login first.", "error");
+      toast(t(language, "pleaseLoginFirst"), "error");
       navigate("/login");
       return;
     }
@@ -579,7 +583,7 @@ const UploadProjectPage = () => {
         state: { uploadDraft: currentDraft },
       });
     } catch (err) {
-      toast(err?.response?.data?.error || "Upload failed", "error");
+      toast(err?.response?.data?.error || t(language, "uploadFailed"), "error");
     } finally {
       setSaving(false);
     }
@@ -614,7 +618,7 @@ const UploadProjectPage = () => {
     });
     localStorage.removeItem(UPLOAD_DRAFT_KEY);
     setFileInputResetKey((prev) => prev + 1);
-    toast("Draft cleared.", "success");
+    toast(t(language, "draftCleared"), "success");
   };
 
   const stepClass = (targetStep) => {
@@ -631,27 +635,27 @@ const UploadProjectPage = () => {
           className="submit-overlay"
           role="status"
           aria-live="polite"
-          aria-label="Submitting project"
+          aria-label={t(language, "submittingProject")}
         >
           <div className="submit-overlay-card">
             <div className="submit-spinner" />
-            <h3>Submitting project...</h3>
-            <p>Please wait while we upload files and queue your build.</p>
+            <h3>{t(language, "submittingProject")}</h3>
+            <p>{t(language, "submittingProjectText")}</p>
           </div>
         </div>
       )}
 
       <div className="upload-layout">
         <aside className="upload-sidebar">
-          <h3>Submission Progress</h3>
-          <div className={stepClass(1)}>1. General Info</div>
-          <div className={stepClass(2)}>2. Assets & Media</div>
-          <div className={stepClass(3)}>3. Review & Submit</div>
+          <h3>{t(language, "submissionProgress")}</h3>
+          <div className={stepClass(1)}>1. {t(language, "generalInfo")}</div>
+          <div className={stepClass(2)}>2. {t(language, "assetsMedia")}</div>
+          <div className={stepClass(3)}>3. {t(language, "reviewSubmit")}</div>
         </aside>
 
         <main className="upload-main">
           <div className="upload-head">
-            <h1>Write Project Documentation</h1>
+            <h1>{t(language, "uploadTitle")}</h1>
             {hasDraftContent && (
               <button
                 type="button"
@@ -659,44 +663,44 @@ const UploadProjectPage = () => {
                 onClick={clearDraft}
                 disabled={saving}
               >
-                Clear Draft
+                {t(language, "clearDraft")}
               </button>
             )}
           </div>
-          <p>Step {step} of 3</p>
+          <p>{t(language, "stepOf")} {step} {t(language, "stepDivider")} 3</p>
           {buildError && (
             <div className="upload-error-box">
-              <h4>Previous build failed</h4>
+              <h4>{t(language, "previousBuildFailed")}</h4>
               <pre>{buildError}</pre>
-              <p>Fix the issue and upload again.</p>
+              <p>{t(language, "fixIssueUploadAgain")}</p>
             </div>
           )}
 
           {step === 1 && (
             <>
               <section className="panel">
-                <h3>General Info</h3>
+                <h3>{t(language, "generalInfo")}</h3>
                 <div className="grid-two">
                   <input
-                    placeholder="Student Name"
+                    placeholder={t(language, "studentName")}
                     value={profile.name || ""}
                     readOnly
                     disabled={saving}
                   />
                   <input
-                    placeholder="Registration Number"
+                    placeholder={t(language, "registrationNumber")}
                     value={profile.regNumber || ""}
                     readOnly
                     disabled={saving}
                   />
                   <input
-                    placeholder="Batch"
+                    placeholder={t(language, "batch")}
                     value={profile.batch || ""}
                     readOnly
                     disabled={saving}
                   />
                   <input
-                    placeholder="Course"
+                    placeholder={t(language, "course")}
                     value={profile.course || ""}
                     readOnly
                     disabled={saving}
@@ -714,21 +718,21 @@ const UploadProjectPage = () => {
                   </select>
                   <input
                     className="full"
-                    placeholder="Project Title"
+                    placeholder={t(language, "projectTitle")}
                     value={form.projectTitle}
                     onChange={(e) => setForm({ ...form, projectTitle: e.target.value })}
                     disabled={saving}
                   />
                   <textarea
                     className="full"
-                    placeholder="Project Description"
+                    placeholder={t(language, "projectDescription")}
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     disabled={saving}
                   />
                   <input
                     className="full"
-                    placeholder="GitHub URL (optional if ZIP used)"
+                    placeholder={t(language, "githubUrlOptional")}
                     value={form.githubUrl}
                     onChange={(e) => setForm({ ...form, githubUrl: e.target.value })}
                     disabled={saving}
@@ -741,7 +745,7 @@ const UploadProjectPage = () => {
                     onChange={handleZipChange}
                     disabled={saving}
                   />
-                  {zipFileName && <p className="comment-empty">Selected ZIP: {zipFileName}</p>}
+                  {zipFileName && <p className="comment-empty">{t(language, "selectedZip")}: {zipFileName}</p>}
                   {fileErrors.zip.length > 0 && (
                     <ul className="input-errors full">
                       {fileErrors.zip.map((err) => (
@@ -753,14 +757,14 @@ const UploadProjectPage = () => {
               </section>
 
               <section className="panel">
-                <h3>Select Team Mates</h3>
+                <h3>{t(language, "selectTeamMates")}</h3>
                 <div className="team-selector-row">
                   <select
                     value={selectedTeammateEmail}
                     onChange={(e) => setSelectedTeammateEmail(e.target.value)}
                     disabled={saving}
                   >
-                    <option value="">Select teammate</option>
+                    <option value="">{t(language, "selectTeammate")}</option>
                     {teammateCandidates.map((student) => (
                       <option key={student._id} value={student.email}>
                         {student.name} ({student.email}) - {student.course} {student.batch || ""}
@@ -768,14 +772,14 @@ const UploadProjectPage = () => {
                     ))}
                   </select>
                   <button type="button" onClick={addTeammateByEmail} disabled={saving}>
-                    Add Teammate
+                    {t(language, "addTeammate")}
                   </button>
                 </div>
                 <p className="team-helper">
-                  Only students from your course ({profileCourse || "N/A"}) and batch ({profileBatch || "N/A"}) are listed.
+                  {t(language, "onlyStudentsListed")} ({profileCourse || "N/A"} / {profileBatch || "N/A"})
                 </p>
                 <div className="team-list">
-                  {teammates.length === 0 && <p>No teammates added (solo by default).</p>}
+                  {teammates.length === 0 && <p>{t(language, "noTeammatesSolo")}</p>}
                   {teammates.map((member) => (
                     <div key={member.email} className="team-item">
                       <span>
@@ -786,7 +790,7 @@ const UploadProjectPage = () => {
                         onClick={() => removeTeammate(member.email)}
                         disabled={saving}
                       >
-                        Remove
+                        {t(language, "remove")}
                       </button>
                     </div>
                   ))}
@@ -794,7 +798,7 @@ const UploadProjectPage = () => {
               </section>
 
               <section className="panel">
-                <h3>Tech Stack</h3>
+                <h3>{t(language, "techStack")}</h3>
                 <div className="stack-pick">
                   {STACKS.map((item) => (
                     <button
@@ -815,8 +819,8 @@ const UploadProjectPage = () => {
           {step === 2 && (
             <>
               <section className="panel">
-                <h3>Assets & Media</h3>
-                <label className="field-label">Image Gallery</label>
+                <h3>{t(language, "assetsMedia")}</h3>
+                <label className="field-label">{t(language, "imageGallery")}</label>
                 <input
                   key={`images-input-${fileInputResetKey}`}
                   type="file"
@@ -838,11 +842,11 @@ const UploadProjectPage = () => {
                   ))}
                 </div>
                 {imagePreviews.length === 0 && imageFileNames.length > 0 && (
-                  <p className="comment-empty">Selected images: {imageFileNames.join(", ")}</p>
+                  <p className="comment-empty">{t(language, "images")}: {imageFileNames.join(", ")}</p>
                 )}
 
                 <div className="video-upload">
-                  <h4>Project Demo Video (optional)</h4>
+                  <h4>{t(language, "projectDemoVideoOptional")}</h4>
                   <input
                     key={`video-input-${fileInputResetKey}`}
                     type="file"
@@ -862,10 +866,10 @@ const UploadProjectPage = () => {
               </section>
 
               <section className="panel">
-                <h3>Documentation</h3>
+                <h3>{t(language, "documentation")}</h3>
                 <textarea
                   className="doc-textarea"
-                  placeholder="Write project documentation, architecture notes, setup steps..."
+                  placeholder={t(language, "documentationPlaceholder")}
                   value={documentation}
                   onChange={(e) => setDocumentation(e.target.value)}
                   disabled={saving}
@@ -873,16 +877,16 @@ const UploadProjectPage = () => {
               </section>
 
               <section className="panel">
-                <h3>Resources</h3>
+                <h3>{t(language, "resourcesTitle")}</h3>
                 <textarea
                   className="doc-textarea"
-                  placeholder="Paste reference links, one per line"
+                  placeholder={t(language, "resourceLinksPlaceholder")}
                   value={resourceLinksText}
                   onChange={(e) => setResourceLinksText(e.target.value)}
                   disabled={saving}
                 />
                 <div className="resource-docs">
-                  <h4>Reference PDFs / Notes (optional)</h4>
+                  <h4>{t(language, "referencePdfsNotes")}</h4>
                   <input
                     key={`resource-input-${fileInputResetKey}`}
                     type="file"
@@ -918,34 +922,34 @@ const UploadProjectPage = () => {
               <section className="panel">
                 <div className="review-top-actions">
                   <button type="button" onClick={() => setStep(1)} disabled={saving}>
-                    Edit General Info
+                    {t(language, "editGeneralInfo")}
                   </button>
                   <button type="button" onClick={() => setStep(2)} disabled={saving}>
-                    Edit Assets & Media
+                    {t(language, "editAssetsMedia")}
                   </button>
                 </div>
-                <h3>Final Review</h3>
+                <h3>{t(language, "finalReview")}</h3>
 
                 <div className="review-block">
-                  <h4>General Info</h4>
+                  <h4>{t(language, "generalInfo")}</h4>
                   <p>
-                    <strong>Title:</strong> {form.projectTitle || "-"}
+                    <strong>{t(language, "title")}:</strong> {form.projectTitle || "-"}
                   </p>
                   <p>
-                    <strong>Tag:</strong> {form.projectTag}
+                    <strong>{t(language, "tag")}:</strong> {form.projectTag}
                   </p>
                   <p>
-                    <strong>Description:</strong> {form.description || "-"}
+                    <strong>{t(language, "description")}:</strong> {form.description || "-"}
                   </p>
                   <p>
-                    <strong>Source:</strong>{" "}
+                    <strong>{t(language, "source")}:</strong>{" "}
                     {form.githubUrl.trim() ? form.githubUrl.trim() : zipFile?.name || zipFileName || "-"}
                   </p>
                 </div>
 
                 <div className="review-block">
-                  <h4>Team</h4>
-                  {teammates.length === 0 && <p>Solo project</p>}
+                  <h4>{t(language, "team")}</h4>
+                  {teammates.length === 0 && <p>{t(language, "soloProject")}</p>}
                   {teammates.length > 0 && (
                     <ul>
                       {teammates.map((member) => (
@@ -958,36 +962,36 @@ const UploadProjectPage = () => {
                 </div>
 
                 <div className="review-block">
-                  <h4>Tech Stack</h4>
+                  <h4>{t(language, "techStack")}</h4>
                   {techStack.length === 0 ? <p>-</p> : <p>{techStack.join(", ")}</p>}
                 </div>
 
                 <div className="review-block">
-                  <h4>Assets & Media</h4>
+                  <h4>{t(language, "assetsMedia")}</h4>
                   <p>
-                    <strong>Images:</strong>{" "}
+                    <strong>{t(language, "images")}:</strong>{" "}
                     {images.length > 0 ? images.length : imageFileNames.length}
                   </p>
                   <p>
-                    <strong>Video:</strong>{" "}
-                    {videoFile?.name || videoFileName || "Not added"}
+                    <strong>{t(language, "video")}:</strong>{" "}
+                    {videoFile?.name || videoFileName || t(language, "notAdded")}
                   </p>
                 </div>
 
                 <div className="review-block">
-                  <h4>Documentation</h4>
+                  <h4>{t(language, "documentation")}</h4>
                   <p>{documentation || "-"}</p>
                 </div>
 
                 <div className="review-block">
-                  <h4>Resources</h4>
+                  <h4>{t(language, "resourcesTitle")}</h4>
                   {resourceLinks.length === 0 &&
                     resourceDocs.length === 0 &&
                     resourceDocNames.length === 0 && <p>-</p>}
                   {resourceLinks.length > 0 && (
                     <>
                       <p>
-                        <strong>Links</strong>
+                        <strong>{t(language, "links")}</strong>
                       </p>
                       <ul>
                         {resourceLinks.map((link) => (
@@ -999,7 +1003,7 @@ const UploadProjectPage = () => {
                   {(resourceDocs.length > 0 || resourceDocNames.length > 0) && (
                     <>
                       <p>
-                        <strong>Files</strong>
+                        <strong>{t(language, "files")}</strong>
                       </p>
                       <ul>
                         {(resourceDocs.length > 0
@@ -1019,17 +1023,17 @@ const UploadProjectPage = () => {
           <div className="submit-row wizard-actions">
             {step > 1 && (
               <button className="btn-secondary" type="button" onClick={onBack} disabled={saving}>
-                Back
+                {t(language, "backBtn")}
               </button>
             )}
             {step < 3 && (
               <button type="button" onClick={onNext} disabled={saving}>
-                Next
+                {t(language, "nextBtn")}
               </button>
             )}
             {step === 3 && (
               <button type="button" onClick={onSubmit} disabled={saving}>
-                {saving ? "Submitting..." : "Submit Project"}
+                {saving ? t(language, "submittingProject") : t(language, "submitProject")}
               </button>
             )}
           </div>

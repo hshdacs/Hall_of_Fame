@@ -1,17 +1,21 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { saveSession } from "../lib/session";
+import { getLanguage, onLanguageChange, t } from "../lib/preferences";
 import { useToast } from "../components/ToastProvider";
 import "../styles/LoginPage.css";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [language, setLanguage] = useState(getLanguage());
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => onLanguageChange(setLanguage), []);
 
   const onLogin = async (e) => {
     e.preventDefault();
@@ -30,14 +34,14 @@ const LoginPage = () => {
       });
       navigate("/landing");
     } catch (err) {
-      setError(err?.response?.data?.message || err?.response?.data?.error || "Login failed");
+      setError(err?.response?.data?.message || err?.response?.data?.error || t(language, "loginFailed"));
     } finally {
       setLoading(false);
     }
   };
 
   const onSsoPlaceholder = (provider) => {
-    toast(`${provider} SSO will be wired once credentials are provided.`, "info");
+    toast(`${provider} ${t(language, "ssoPlaceholder")}`, "info");
   };
 
   return (
@@ -45,34 +49,31 @@ const LoginPage = () => {
       <div className="login-left">
         <div className="login-mark">SRH Project Hub</div>
         <h1>
-          Elevate Your
+          {t(language, "loginHeroTitleTop")}
           <br />
-          Academic Journey.
+          {t(language, "loginHeroTitleBottom")}
         </h1>
-        <p>
-          Collaborate, review, and innovate with your peers and professors on
-          the SRH Applied Sciences platform.
-        </p>
+        <p>{t(language, "loginHeroText")}</p>
       </div>
 
       <div className="login-right">
         <form className="login-card" onSubmit={onLogin}>
-          <h2>Welcome Back</h2>
-          <p>Sign in to continue to SRH Project Hub.</p>
+          <h2>{t(language, "welcomeBack")}</h2>
+          <p>{t(language, "signInContinue")}</p>
 
-          <label>SRH Email</label>
+          <label>{t(language, "srhEmail")}</label>
           <input
             type="email"
-            placeholder="e.g. student@stud.hochschule-heidelberg.de"
+            placeholder={t(language, "emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
 
-          <label>Password</label>
+          <label>{t(language, "password")}</label>
           <input
             type="password"
-            placeholder="Enter password"
+            placeholder={t(language, "passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -81,10 +82,10 @@ const LoginPage = () => {
           {error && <div className="login-error">{error}</div>}
 
           <button type="submit" className="primary-btn" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? t(language, "signingIn") : t(language, "signIn")}
           </button>
 
-          <div className="divider">or sign in with</div>
+          <div className="divider">{t(language, "orSignInWith")}</div>
 
           <div className="sso-row">
             <button type="button" onClick={() => onSsoPlaceholder("Microsoft")}>
@@ -94,6 +95,10 @@ const LoginPage = () => {
               OpenID
             </button>
           </div>
+
+          <p className="auth-switch-text">
+            {t(language, "newHere")} <Link to="/register">{t(language, "createViewerAccount")}</Link>
+          </p>
         </form>
       </div>
     </div>

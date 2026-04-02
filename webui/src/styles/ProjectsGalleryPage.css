@@ -3,6 +3,23 @@
   background: #f5f7fb;
 }
 
+.gallery-head {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 20px 0;
+}
+
+.gallery-head h1 {
+  margin: 0;
+  color: #11253e;
+  font-size: 34px;
+}
+
+.gallery-head p {
+  margin: 8px 0 0;
+  color: #627587;
+}
+
 .gallery-controls {
   max-width: 1120px;
   margin: 18px auto;

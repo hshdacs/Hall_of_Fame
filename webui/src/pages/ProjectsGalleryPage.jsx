@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import SrhNavbar from "../components/SrhNavbar";
+import { getUserProfile } from "../lib/session";
+import { getLanguage, onLanguageChange, t } from "../lib/preferences";
 import "../styles/ProjectsGalleryPage.css";
 
 const VISIBLE_PROJECT_STATUSES = new Set(["ready", "running", "stopped"]);
@@ -18,14 +20,19 @@ const getTeamSummary = (project) => {
   return `Team: ${uniqueNames[0]}, ${uniqueNames[1]} +${uniqueNames.length - 2}`;
 };
 
-const ProjectsGalleryPage = () => {
+const ProjectsGalleryPage = ({ onlyMine = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const profile = getUserProfile();
+  const currentUserId = String(profile?.id || profile?._id || "");
+  const [language, setLanguageState] = useState(getLanguage());
   const [projects, setProjects] = useState([]);
   const [search, setSearch] = useState("");
   const [course, setCourse] = useState("ALL");
   const [tag, setTag] = useState("ALL");
   const [page, setPage] = useState(1);
+
+  useEffect(() => onLanguageChange(setLanguageState), []);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -62,6 +69,9 @@ const ProjectsGalleryPage = () => {
 
   const filtered = useMemo(() => {
     return projects.filter((project) => {
+      const mineMatch = !onlyMine || String(project.ownerUserId || "") === currentUserId;
+      if (!mineMatch) return false;
+
       const term = search.toLowerCase();
       const textMatch =
         (project.projectTitle || "").toLowerCase().includes(term) ||
@@ -73,11 +83,11 @@ const ProjectsGalleryPage = () => {
       const tagMatch = tag === "ALL" ? true : (project.projectTag || "General") === tag;
       return textMatch && courseMatch && tagMatch;
     });
-  }, [projects, search, course, tag]);
+  }, [projects, search, course, tag, onlyMine, currentUserId]);
 
   useEffect(() => {
     setPage(1);
-  }, [search, course, tag]);
+  }, [search, course, tag, onlyMine]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const pagedProjects = useMemo(() => {
@@ -94,21 +104,26 @@ const ProjectsGalleryPage = () => {
     <div className="gallery-page">
       <SrhNavbar />
 
+      <div className="gallery-head">
+        <h1>{onlyMine ? t(language, "myProjectsHeading") : t(language, "projectsHeading")}</h1>
+        {onlyMine && <p>{t(language, "myProjectsSubheading")}</p>}
+      </div>
+
       <div className="gallery-controls">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search projects, students, or topics"
+          placeholder={t(language, "searchProjects")}
         />
         <select value={course} onChange={(e) => setCourse(e.target.value)}>
-          <option value="ALL">All Departments</option>
+          <option value="ALL">{t(language, "allDepartments")}</option>
           <option value="ACS">ACS</option>
           <option value="ADS">ADS</option>
         </select>
         <select value={tag} onChange={(e) => setTag(e.target.value)}>
           {tags.map((item) => (
             <option value={item} key={item}>
-              {item === "ALL" ? "All Tags" : item}
+              {item === "ALL" ? t(language, "allTags") : item}
             </option>
           ))}
         </select>
@@ -136,18 +151,18 @@ const ProjectsGalleryPage = () => {
         })}
       </div>
 
-      {filtered.length === 0 && <p className="no-projects-msg">No projects found.</p>}
+      {filtered.length === 0 && <p className="no-projects-msg">{t(language, "noProjects")}</p>}
 
       {filtered.length > ITEMS_PER_PAGE && (
         <div className="pagination-wrap">
           <button type="button" onClick={() => goToPage(page - 1)} disabled={page === 1}>
-            Prev
+            {t(language, "prev")}
           </button>
           <span>
-            Page {page} of {totalPages}
+            {t(language, "page")} {page} {t(language, "of")} {totalPages}
           </span>
           <button type="button" onClick={() => goToPage(page + 1)} disabled={page === totalPages}>
-            Next
+            {t(language, "next")}
           </button>
         </div>
       )}

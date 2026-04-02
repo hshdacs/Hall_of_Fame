@@ -51,7 +51,7 @@
   border: 0;
   border-radius: 8px;
   padding: 8px 14px;
-  background: #df4807;
+  background: #1b53a6;
   color: #fff;
   font-weight: 700;
   cursor: pointer;
@@ -65,6 +65,116 @@
   padding: 5px 10px;
 }
 
+.account-menu-wrap {
+  position: relative;
+}
+
+.account-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent !important;
+  box-shadow: none;
+  color: #fff;
+  padding: 4px 10px 4px 4px;
+}
+
+.account-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.account-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #eef3fb;
+  color: #17324f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.account-caret {
+  font-size: 12px;
+  color: #c8d6e5;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid #dfe7f0;
+  border-radius: 14px;
+  box-shadow: 0 18px 36px rgba(9, 26, 46, 0.14);
+  padding: 8px;
+  z-index: 30;
+}
+
+.account-menu button {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: #17324f;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.account-menu button:hover {
+  background: #f3f7fd;
+}
+
+.account-menu-section {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid #edf2f8;
+}
+
+.account-logout-item {
+  color: #b84318 !important;
+}
+
+.account-logout-item:hover {
+  background: #fff3ee !important;
+}
+
+.account-menu-section span {
+  display: block;
+  padding: 0 12px 8px;
+  color: #617388;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.language-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 0 8px 4px;
+}
+
+.account-menu .language-options button {
+  text-align: center;
+  border: 1px solid #d7e1ec;
+  background: #fff;
+  padding: 9px 8px;
+  color: #17324f;
+}
+
+.account-menu .language-options button.active {
+  border-color: #df4807;
+  background: #fff1ea;
+  color: #c44911;
+}
+
 @media (max-width: 900px) {
   .srh-top-strip {
     height: 42px;
@@ -76,6 +186,10 @@
     height: 34px;
   }
   .srh-links {
+    display: none;
+  }
+
+  .role-chip {
     display: none;
   }
 }
