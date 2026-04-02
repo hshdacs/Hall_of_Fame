@@ -1,39 +1,88 @@
 # SRH Hall of Fame Platform
 
-SRH Hall of Fame is a Docker-based academic project showcase platform for SRH students, faculty, admins, and public viewers.
+SRH Hall of Fame is a Docker-based academic project showcase platform built for SRH University. It allows students to upload projects, faculty to review them, admins to monitor platform usage, and public viewers to explore and run live projects.
+
+## Overview
 
 The platform supports:
-- project upload by ZIP or GitHub repository
-- automatic Docker build processing
-- on-demand run and stop of live projects
+
+- project submission using ZIP upload or GitHub repository URL
+- automatic Docker-based build pipeline
+- on-demand live project run and stop
 - screenshots, demo videos, and reference document uploads
-- teacher remarks and public comments
+- teacher remarks and community comments
 - admin quota monitoring and queue visibility
+- multilingual UI support with German as default and English as optional
 
-## Main Documentation
-The complete software project documentation is available here:
+## Active Project Structure
 
-- `SRH_Platform_Documentation_v1.md`
+This repository currently uses:
 
-That document covers:
-- architecture and repository structure
-- technology stack
-- MongoDB, Redis, Docker, and GCS usage
-- required environment variables
-- how to start backend, worker, and frontend
-- upload, build, run, and stop flow
-- role-based usage for viewer, student, faculty, and admin
-- quota monitoring and build log behavior
+- `Backend/` - Express API, MongoDB models, Redis/Bull queue, Docker build/run services, GCS integration
+- `webui/` - React frontend for students, faculty, admins, and viewers
 
-## Reference Material
-Additional reference material in this repository:
+## Main Features
 
-- `Project_Documentation.pdf`
+### Authentication and Roles
+Supported roles:
 
-## Main Runtime Folders
-- `Backend/` - Express API, queue worker, DB models, Docker build/run services
-- `webui/` - React frontend
+- `viewer` - can browse projects, view details, and comment after login
+- `student` - can upload projects, manage own projects, and view own remarks/logs
+- `faculty` - can review projects, upload, and publish remarks
+- `admin` - can monitor quotas, inspect runtime health, and manage platform operations
 
-## Quick Start
-See Section 15 and Section 26 in `SRH_Platform_Documentation_v1.md`.
+### Project Workflow
+- Upload project by ZIP or GitHub
+- Validate project source and metadata
+- Queue build in Redis/Bull
+- Build Docker image automatically
+- Store logs and build history
+- Run project on demand
+- Stop running project when needed
 
+### Media and Documentation
+- screenshot uploads
+- demo video uploads
+- resource/reference links
+- documentation notes
+- project team metadata
+
+## Technology Stack
+
+### Frontend
+- React
+- React Router DOM
+- Axios
+- CSS modules / custom styling
+
+### Backend
+- Node.js
+- Express
+- MongoDB + Mongoose
+- Redis
+- Bull Queue
+- JWT authentication
+- bcrypt password hashing
+
+### Infrastructure
+- Docker / Docker Compose
+- Google Cloud Storage (current media storage)
+- MongoDB Atlas (current DB setup)
+
+## How to Start the Application
+
+Open 3 terminals from the repository root.
+
+### 1. Start Backend API
+```bash
+cd Backend
+npm install
+npm run dev:api
+2. Start Background Worker
+cd Backend
+npm install
+npm run dev:worker
+3. Start Frontend
+cd webui
+npm install
+npm start
