@@ -122,6 +122,22 @@
   cursor: pointer;
 }
 
+.auth-switch-text {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.auth-switch-text a {
+  color: #df4807;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-switch-text a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 1000px) {
   .login-shell {
     grid-template-columns: 1fr;

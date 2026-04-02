@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "supersecret123";
 // REGISTER USER
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, regNumber, batch, course } = req.body;
+    const { name, email, password, dob, regNumber, batch, course } = req.body;
 
     // Check if user exists
     const existing = await User.findOne({ email });
@@ -22,6 +22,7 @@ exports.register = async (req, res) => {
     const user = await User.create({
       name,
       email,
+      dob: dob ? new Date(dob) : undefined,
       regNumber,
       batch,
       course: course?.toUpperCase?.() || course,
@@ -60,6 +61,7 @@ exports.login = async (req, res) => {
       role: user.role,
       name: user.name,
       email: user.email,
+      dob: user.dob || "",
       regNumber: user.regNumber || "",
       batch: user.batch || "",
       course: user.course || "",
@@ -79,6 +81,7 @@ exports.login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        dob: user.dob || "",
         regNumber: user.regNumber || "",
         batch: user.batch || "",
         course: user.course || "",

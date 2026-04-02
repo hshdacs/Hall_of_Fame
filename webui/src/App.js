@@ -10,11 +10,19 @@ import ProjectsGalleryPage from './pages/ProjectsGalleryPage.jsx';
 import ProjectWorkspacePage from './pages/ProjectWorkspacePage.jsx';
 import UploadProjectPage from './pages/UploadProjectPage.jsx';
 import BuildStatusPage from './pages/BuildStatusPage.jsx';
-import { isLoggedIn } from './lib/session';
+import RegisterPage from './pages/RegisterPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
+import { getRole, isLoggedIn } from './lib/session';
 import { ToastProvider } from './components/ToastProvider.jsx';
 
 const PrivateRoute = ({ element }) => {
   return isLoggedIn() ? element : <Navigate to="/login" replace />;
+};
+
+const RoleRoute = ({ element, allowedRoles }) => {
+  const role = getRole();
+  if (!isLoggedIn()) return <Navigate to="/login" replace />;
+  return allowedRoles.includes(role) ? element : <Navigate to="/projects" replace />;
 };
 
 const AppRoutes = () => {
@@ -36,12 +44,24 @@ const AppRoutes = () => {
         <Routes location={location}>
           <Route path="/" element={<Navigate to="/landing" replace />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/projects" element={<ProjectsGalleryPage />} />
+          <Route
+            path="/my-projects"
+            element={<RoleRoute element={<ProjectsGalleryPage onlyMine />} allowedRoles={["student"]} />}
+          />
+          <Route path="/profile" element={<PrivateRoute element={<ProfilePage />} />} />
           <Route path="/project/:projectId" element={<ProjectWorkspacePage />} />
           <Route path="/build-status/:projectId" element={<PrivateRoute element={<BuildStatusPage />} />} />
-          <Route path="/upload" element={<PrivateRoute element={<UploadProjectPage />} />} />
-          <Route path="/admin/monitoring" element={<PrivateRoute element={<AdminQuotaMonitor />} />} />
+          <Route
+            path="/upload"
+            element={<RoleRoute element={<UploadProjectPage />} allowedRoles={["student", "faculty", "admin"]} />}
+          />
+          <Route
+            path="/admin/monitoring"
+            element={<RoleRoute element={<AdminQuotaMonitor />} allowedRoles={["admin"]} />}
+          />
           <Route path="/legacy-dashboard" element={<Dashboard />} />
         </Routes>
       </div>
